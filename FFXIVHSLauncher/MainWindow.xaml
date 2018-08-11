@@ -1,0 +1,36 @@
+﻿<Window x:Class="FFXIVHSLauncher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FFXIVHSLauncher"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="477" Width="827">
+    <Grid Margin="0,0,-0.4,0" Height="447" VerticalAlignment="Top">
+        <Button x:Name="openButton" Content="Extract" HorizontalAlignment="Left" Margin="696,359,0,0" VerticalAlignment="Top" Width="88" Height="23" Click="openButton_Click"/>
+        <ListBox x:Name="placeBox" HorizontalAlignment="Left" Height="313" Margin="453,41,0,0" VerticalAlignment="Top" Width="238" SelectionChanged="placeBox_SelectionChanged"/>
+        <Label x:Name="amountLabel" Content="Territories found: " HorizontalAlignment="Left" Margin="453,10,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="box" HorizontalAlignment="Left" Height="396" Margin="10,9,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="425" AcceptsReturn="True"/>
+        <TextBox x:Name="pathBox" HorizontalAlignment="Left" Height="23" Margin="453,359,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="238"/>
+        <Label x:Name="existsLabel" Content="" HorizontalAlignment="Left" Margin="453,385,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="packBox" HorizontalAlignment="Left" Height="23" Margin="453,382,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="238"/>
+        <Button x:Name="getFilesBtn" Content="Get Files" HorizontalAlignment="Left" Margin="696,35,0,0" VerticalAlignment="Top" Width="113" RenderTransformOrigin="0.301,0.344" Click="getFilesBtn_Click"/>
+        <Button x:Name="getObjFilesBtn" Content="Get Obj Files" HorizontalAlignment="Left" Margin="696,107,0,0" VerticalAlignment="Top" Width="113" RenderTransformOrigin="0.285,2.228" Click="getObjFilesBtn_Click"/>
+        <Button x:Name="csvButton" Content="Get CSV" HorizontalAlignment="Left" Margin="696,83,0,0" VerticalAlignment="Top" Width="113" Click="csvButton_Click"/>
+        <Button x:Name="recSgbBtn" Content="Recursive SGB" HorizontalAlignment="Left" Margin="696,59,0,0" VerticalAlignment="Top" Width="113" Click="recSgbBtn_Click"/>
+        <TextBox x:Name="existsBox" HorizontalAlignment="Left" Height="23" Margin="8,410,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="427" TextChanged="existsBox_TextChanged"/>
+        <CheckBox x:Name="existsCheckBtn" Content="Exists" HorizontalAlignment="Left" Margin="440,410,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.153,0.195"/>
+        <Label x:Name="offsetLabel" Content="Offset:" HorizontalAlignment="Left" Margin="435,416,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.375,0.398" Height="27"/>
+        <Label Content="Deprecated:" HorizontalAlignment="Left" Margin="691,9,0,0" VerticalAlignment="Top"/>
+        <Label Content="Extract:" HorizontalAlignment="Left" Margin="691,127,0,0" VerticalAlignment="Top"/>
+        <Label Content="Experimental:" HorizontalAlignment="Left" Margin="696,264,0,0" VerticalAlignment="Top"/>
+        <Button Content="WardInfo JSON" HorizontalAlignment="Left" Margin="696,172,0,0" VerticalAlignment="Top" Width="113" Click="JsonWriteButton_Click"/>
+        <Button Content="Resolve SGBs in Box" x:Name="ResolveBoxSgbs" HorizontalAlignment="Left" Margin="696,290,0,0" VerticalAlignment="Top" Width="113" Height="22" IsCancel="True" Click="ResolveBoxSgbs_Click">
+        </Button>
+        <Button x:Name="ExteriorHousingJsonBtn" Content="Ext Housing JSON" HorizontalAlignment="Left" Margin="696,196,0,0" VerticalAlignment="Top" Width="113" Height="19" Click="ExteriorHousingJsonBtn_Click"/>
+        <Button x:Name="BlueprintButton" Content="Blueprints JSON" HorizontalAlignment="Left" Margin="696,220,0,0" VerticalAlignment="Top" Width="113" Click="BlueprintButton_Click"/>
+        <Button x:Name="ExtractMapBtn" Content="Extract Map JSON" HorizontalAlignment="Left" Margin="696,148,0,0" VerticalAlignment="Top" Width="113" Click="ExtractMapBtn_Click"/>
+
+
+    </Grid>
+</Window>
