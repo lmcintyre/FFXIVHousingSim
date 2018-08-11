@@ -260,7 +260,7 @@ public static class DataHandler
 		    {	
 			    //Add mesh, handles materials
 			    Mesh[] meshes = _modelMeshes[entry.modelId];
-			    GameObject obj = AddMeshToNewGameObject(meshes);
+			    GameObject obj = AddMeshToNewGameObject(meshes, true);
 
 			    obj.GetComponent<Transform>().position = entry.transform.translation;
 			    obj.GetComponent<Transform>().rotation = Quaternion.Euler(entry.transform.rotation.RadiansToDegreesRotation());
@@ -338,7 +338,7 @@ public static class DataHandler
 		}
 	}
 	
-	private static GameObject AddMeshToNewGameObject(Mesh[] meshes, string name = null)
+	private static GameObject AddMeshToNewGameObject(Mesh[] meshes, bool addMeshCollider = false, string name = null)
 	{
 		//Set up our gameobject and add a renderer and filter
 		GameObject obj = new GameObject();
@@ -399,6 +399,8 @@ public static class DataHandler
 		
 			obj.GetComponent<MeshFilter>().mesh = main;
 		}
+		if (addMeshCollider)
+			obj.AddComponent<MeshCollider>();
 
 		string newName = "";
 		//Redo this
