@@ -31,4 +31,5 @@ Currently, the project has some functionality including (assume all functionalit
 3. Select a territory and click all buttons under 'Extract' but click '__Extract Map JSON__' and '__Ext Housing JSON__' __twice__. This is what extracts models.
 4. Change all paths pointing to my local filesystem again for the Unity project, change the ward to your extracted ward in `StartupScript.cs` and click Play
 5. After a minute and a half you should have a loaded map! If you want to play around with exterior fixtures, modify the ward folder's `Landset.json` file by hand and relaunch the 'game'.
+
 The above documentation may be incorrect at any time and is untested. Visual Studio is used for the Launcher, and JetBrains Rider is used for the Unity code.
