@@ -155,8 +155,8 @@ public class MaterialHandler
 			}
 		}
 		
-		if (!DebugLoadFiles)
-			Debug.LogFormat("Added material named {0} with shader {1}", thisMaterial.name, thisMaterial.shader.name);
+//		if (!DebugLoadFiles)
+//			Debug.LogFormat("Added material named {0} with shader {1}", thisMaterial.name, thisMaterial.shader.name);
 		_materialDictionary.Add(thisMaterial.name, thisMaterial);
 		return true;
 	}
@@ -297,6 +297,11 @@ public class MaterialHandler
 	public void RegisterMaterialForMesh(String meshName, String materialName)
 	{
 		Material material;
+		string dictMaterialName;
+		
+		if (_meshMaterialDictionary.TryGetValue(meshName, out dictMaterialName))
+			return;
+		
 		if (!_materialDictionary.TryGetValue(materialName, out material))
 			return;
 

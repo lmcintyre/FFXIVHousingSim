@@ -106,8 +106,8 @@ namespace FFXIVHSLauncher
             modelName = modelName.Substring(finalSep);
             modelName = Path.GetFileNameWithoutExtension(modelName);
             modelName = modelName + "_" + meshNumber + ".obj";
-
-            StreamWriter sw = new StreamWriter(new FileStream(path + "//" + modelName, FileMode.Append));
+            
+            StreamWriter sw = new StreamWriter(new FileStream(path + "//" + modelName, FileMode.Create));
             sw.WriteLine("#for housing sim :-)");
 
             //mtl
@@ -127,14 +127,14 @@ namespace FFXIVHSLauncher
             //verts
             sw.WriteLine("#vert");
             foreach (Vector3 vert in vsList)
-                sw.WriteLine("v {0} {1} {2}", vert.X, vert.Y, vert.Z);
+                sw.WriteLine("v {0} {1} {2}", (decimal)vert.X, (decimal)vert.Y, (decimal)vert.Z);
             sw.WriteLine();
 
             //colors
             sw.WriteLine("#vertex colors");
             foreach (Vector4 color in vcList)
             {
-                sw.WriteLine("vc {0} {1} {2} {3}", color.W, color.X, color.Y, color.Z);
+                sw.WriteLine("vc {0} {1} {2} {3}", (decimal)color.W, (decimal)color.X, (decimal)color.Y, (decimal)color.Z);
             }
             sw.WriteLine();
 
@@ -142,7 +142,7 @@ namespace FFXIVHSLauncher
             sw.WriteLine("#texcoords");
             foreach (Vector4 texCoord in vtList)
             {
-                sw.WriteLine("vt {0} {1} {2} {3}", texCoord.X, texCoord.Y, texCoord.W, texCoord.Z);
+                sw.WriteLine("vt {0} {1} {2} {3}", (decimal)texCoord.X, (decimal)texCoord.Y, (decimal)texCoord.W, (decimal)texCoord.Z);
             }
             
             sw.WriteLine();
@@ -150,13 +150,13 @@ namespace FFXIVHSLauncher
             //normals
             sw.WriteLine("#normals");
             foreach (Vector3 norm in nmList)
-                sw.WriteLine("vn {0} {1} {2}", norm.X, norm.Y, norm.Z);
+                sw.WriteLine("vn {0} {1} {2}", (decimal)norm.X, (decimal)norm.Y, (decimal)norm.Z);
             sw.WriteLine();
 
             //indices
             sw.WriteLine("#indices");
             foreach (Vector3 ind in inList)
-                sw.WriteLine("f {0}/{0}/{0} {1}/{1}/{1} {2}/{2}/{2}", ind.X, ind.Y, ind.Z);
+                sw.WriteLine("f {0}/{0}/{0} {1}/{1}/{1} {2}/{2}/{2}", (decimal)ind.X, (decimal)ind.Y, (decimal)ind.Z);
 
             sw.Flush();
             sw.Close();

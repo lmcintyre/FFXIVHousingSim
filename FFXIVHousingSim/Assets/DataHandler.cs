@@ -243,7 +243,7 @@ public static class DataHandler
             for (int i = 0; i < model.numMeshes; i++)
             {
                 string meshFileName = string.Format("{0}{1}_{2}.obj", objectsFolder, model.modelName, i);
-                modelMeshes[i] = ObjImporter.ImportFile(meshFileName);
+	            modelMeshes[i] = FastObjImporter.Instance.ImportFile(meshFileName);
             }
             _modelMeshes.Add(model.id, modelMeshes);
         }
@@ -473,7 +473,7 @@ public static class DataHandler
 					for (int k = 0; k < model.numMeshes; k++)
 					{
 						string meshFileName = string.Format("{0}{1}_{2}.obj", exteriorHousingObjectsFolder, model.modelName, k);
-						modelMeshes[i][j][k] = ObjImporter.ImportFile(meshFileName);
+						modelMeshes[i][j][k] = FastObjImporter.Instance.ImportFile(meshFileName);
 					}
 					j++;
 				}
