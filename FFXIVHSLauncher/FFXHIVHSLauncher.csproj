@@ -141,9 +141,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="resources\MistFiles.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="wardsettings.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

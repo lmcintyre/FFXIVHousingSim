@@ -168,12 +168,13 @@ public sealed class FastObjImporter
                 {
                     int splitStart = 3;
 
+                    //Colors are written a, r, g, b
+                    byte a = Scale(GetFloat(sb, ref splitStart, ref sbFloat));
                     byte r = Scale(GetFloat(sb, ref splitStart, ref sbFloat));
                     byte g = Scale(GetFloat(sb, ref splitStart, ref sbFloat));
-                    byte a = Scale(GetFloat(sb, ref splitStart, ref sbFloat));
                     byte b = Scale(GetFloat(sb, ref splitStart, ref sbFloat));
 
-                    if (r + g + b + a > 0)
+                    if (!hasColor && r + g + b + a > 0)
                         hasColor = true;
                     
                     colors.Add(new Color32(r, g, b, a));

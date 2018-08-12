@@ -93,10 +93,7 @@ namespace FFXIVHSLauncher
                 }
             }
 
-            //TODO: Fix this path :-)
-            string path = @"C:\Users\Liam\Documents\ff_project\FFXIVHousingSim\FFXIVHousingSim\wardsettings.json";
-
-            WardSetting[] settings = JsonConvert.DeserializeObject<WardSetting[]>(File.ReadAllText(path));
+            WardSetting[] settings = JsonConvert.DeserializeObject<WardSetting[]>(File.ReadAllText(FFXIVHSPaths.GetWardSettingsJson()));
             
             foreach (TerritoryType tType in housingTeriTypes)
             {
@@ -614,7 +611,7 @@ namespace FFXIVHSLauncher
             ReadLandSetSheet(realm, ref plots);
             ReadTerritoryPlots(realm, ref plots);
 
-            string outpath = @"C:\Users\Liam\Desktop\trash\WardInfo.json";
+            string outpath = FFXIVHSPaths.GetWardInfoJson();
 
             if (File.Exists(outpath))
                 File.Delete(outpath);
@@ -626,7 +623,8 @@ namespace FFXIVHSLauncher
 
         public static void WriteOutHousingExteriorInfo(ARealmReversed realm)
         {
-            string outpath = @"C:\Users\Liam\Desktop\trash\HousingExterior\HousingExterior.json";
+            string outpath = FFXIVHSPaths.GetHousingExteriorJson();
+
             if (File.Exists(outpath))
             {
                 WriteOutHousingExteriorModels(realm);
@@ -642,13 +640,11 @@ namespace FFXIVHSLauncher
 
         public static void WriteOutHousingExteriorModels(ARealmReversed realm)
         {
-            string inpath = @"C:\Users\Liam\Desktop\trash\HousingExterior.json";
+            string inpath = FFXIVHSPaths.GetHousingExteriorJson();
             if (!File.Exists(inpath))
                 throw new FileNotFoundException();
 
-            string outpath = @"C:\Users\Liam\Desktop\trash\HousingExterior\objects";
-            if (!Directory.Exists(outpath))
-                Directory.CreateDirectory(outpath);
+            string outpath = FFXIVHSPaths.GetHousingExteriorObjectsDirectory();
 
             string jsonText = File.ReadAllText(inpath);
 
@@ -672,7 +668,7 @@ namespace FFXIVHSLauncher
         {
             HousingExteriorBlueprintSet blueprintSet = ReadExteriorBlueprintSet(realm);
 
-            string outpath = @"C:\Users\Liam\Desktop\trash\HousingExteriorBlueprintSet.json";
+            string outpath = FFXIVHSPaths.GetHousingExteriorBlueprintSetJson();
             if (File.Exists(outpath))
                 File.Delete(outpath);
 
@@ -683,7 +679,10 @@ namespace FFXIVHSLauncher
 
         public static void WriteMap(ARealmReversed realm, TerritoryType teriType)
         {
-            string outpath = @"C:\Users\Liam\Desktop\trash\" + teriType.Name + @"\main.json";
+            Plot.Ward ward = Plot.StringToWard(teriType.Name);
+
+            string outpath = FFXIVHSPaths.GetWardJson(ward);
+
             if (File.Exists(outpath))
             {
                 WriteMapModels(realm, teriType);
@@ -699,13 +698,13 @@ namespace FFXIVHSLauncher
 
         public static void WriteMapModels(ARealmReversed realm, TerritoryType teriType)
         {
-            string inpath = @"C:\Users\Liam\Desktop\trash\" + teriType.Name + @"\main.json";
+            Plot.Ward ward = Plot.StringToWard(teriType.Name);
+
+            string inpath = FFXIVHSPaths.GetWardJson(ward);
             if (!File.Exists(inpath))
                 throw new FileNotFoundException();
 
-            string outpath = @"C:\Users\Liam\Desktop\trash\" + teriType.Name + @"\objects\";
-            if (!Directory.Exists(outpath))
-                Directory.CreateDirectory(outpath);
+            string outpath = FFXIVHSPaths.GetWardObjectsDirectory(ward);
 
             string json = File.ReadAllText(inpath);
                 

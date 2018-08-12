@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using FFXIVHSLib;
 using SaintCoinach;
 using SaintCoinach.Xiv;
 using SaintCoinach.Graphics;
@@ -26,34 +27,33 @@ namespace FFXIVHSLauncher
     public partial class MainWindow : Window
     {
         private const bool debug = true;
-        const string mapPath = @"C:\Users\Liam\Desktop\trash\";
+
+        //This doesn't do anything.
+        const string mapPath = "";
+
         private string territoryName = "";
         private SaintCoinach.ARealmReversed realm;
         private Territory territory;
-
         private StringBuilder maplist;
 
         public MainWindow()
         {
             InitializeComponent();
             
-            const string GameDirectory = @"C:\Program Files (x86)\SquareEnix\FINAL FANTASY XIV - A Realm Reborn";
-            realm = new ARealmReversed(GameDirectory, SaintCoinach.Ex.Language.English);
+            realm = new ARealmReversed(FFXIVHSPaths.GetGameDirectory(), SaintCoinach.Ex.Language.English);
 
             if (!realm.IsCurrentVersion)
             {
-                realm.Update(true);
                 MessageBox.Show("Game ver: " + realm.GameVersion + Environment.NewLine +
-                                "Def ver: " + realm.DefinitionVersion);
+                                "Def ver: " + realm.DefinitionVersion + Environment.NewLine +
+                                "Updating...");
+                realm.Update(true);
             }
-
-            IXivSheet<TerritoryType> allTerr = realm.GameData.GetSheet<TerritoryType>();
-            TerritoryType[] test = allTerr.ToArray();
+            
+            TerritoryType[] territoryTypes = realm.GameData.GetSheet<TerritoryType>().ToArray();
             List<TerritoryType> relevantTerritories = new List<TerritoryType>();
-
-            amountLabel.Content = (String) amountLabel.Content + test.Length;
-
-            foreach (TerritoryType t in test)
+            
+            foreach (TerritoryType t in territoryTypes)
             {
                 if (!String.IsNullOrEmpty(t.PlaceName.ToString()))
                 {
@@ -66,6 +66,7 @@ namespace FFXIVHSLauncher
                     }
                 }
             }
+            amountLabel.Content = (String)amountLabel.Content + relevantTerritories.Count;
 
             placeBox.ItemsSource = relevantTerritories;
             placeBox.DisplayMemberPath = "PlaceName";

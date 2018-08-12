@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -252,6 +253,11 @@ namespace FFXIVHSLib
             this.index = ind;
             this.subdiv = sub;
             this.size = size;
+        }
+
+        public static Ward StringToWard(String ward)
+        {
+            return (Ward) Enum.Parse(typeof(Ward), ward.ToUpperInvariant());
         }
     }
 

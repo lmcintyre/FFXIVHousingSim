@@ -1,12 +1,17 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+ using UnityEngine.UI;
 
+//TODO write this like fastobjimporter eventually to see if it will increase speed
 public class MaterialHandler
 {
+	//Whether or not to actually load textures, or just use default material
 	private bool DebugLoadFiles = true;
+	
+	//This turns every shader into the shader specified by sh if true.
 	private static bool shOverride = true;
 	private static Shader sh = Shader.Find("Silent/FF14 World NonBlend");
 	
@@ -97,17 +102,28 @@ public class MaterialHandler
 						break;
 					case "map_Kd":
 						{
-							//braces because what really is C#
 							//TODO: fix alpha/cutout
-							Boolean hasAlphaInDiffuse;
-							Texture2D tex = LoadTexture(Path.Combine(Directory.GetParent(materialPath).ToString(),
-								splitLine[1].Trim()), out hasAlphaInDiffuse);
-
-							if (hasAlphaInDiffuse)
-								thisMaterial.shader = cutout;
 								
 							Texture existingTexture = thisMaterial.GetTexture("_Albedo0");
+							Texture2D tex;
 							
+							bool hasAlphaInDiffuse;
+							bool isDummy = splitLine[1].Contains("dummy");
+
+							if (isDummy)
+							{
+								if (existingTexture != null)
+									tex = existingTexture as Texture2D;
+								else
+									tex = Texture2D.blackTexture;
+							}
+							else
+								tex = LoadTexture(Path.Combine(Directory.GetParent(materialPath).ToString(), splitLine[1].Trim()), out hasAlphaInDiffuse);
+
+							tex.alphaIsTransparency = true;
+//							if (hasAlphaInDiffuse)
+//								thisMaterial.shader = cutout;
+								
 							if (tex != null && existingTexture == null)
 								thisMaterial.SetTexture("_Albedo0", tex);
 							else if (tex != null)
@@ -116,12 +132,23 @@ public class MaterialHandler
 						break;
 					case "bump":
 						{
-							Texture2D tex = LoadTexture(Path.Combine(Directory.GetParent(materialPath).ToString(),
-								splitLine[1].Trim()));
-
-							SetNormalMap(ref tex);
-							
 							Texture existingTexture = thisMaterial.GetTexture("_NormalMap0");
+							Texture2D tex;
+							bool isDummy = splitLine[1].Contains("dummy");
+
+							if (isDummy)
+							{
+								if (existingTexture != null)
+									tex = existingTexture as Texture2D;
+								else
+									tex = Texture2D.blackTexture;
+							}
+							else
+								tex = LoadTexture(Path.Combine(Directory.GetParent(materialPath).ToString(), splitLine[1].Trim()));
+
+							tex.alphaIsTransparency = true;
+							//SetNormalMap(ref tex);
+							
 							if (tex != null && existingTexture == null)
 								thisMaterial.SetTexture("_NormalMap0", tex);
 							else if (tex != null)
@@ -130,10 +157,21 @@ public class MaterialHandler
 						break;
 					case "map_Ks":
 						{
-							Texture2D tex = LoadTexture(Path.Combine(Directory.GetParent(materialPath).ToString(),
-								splitLine[1].Trim()));
-	
 							Texture existingTexture = thisMaterial.GetTexture("_Metallic0");
+							Texture2D tex;
+							bool isDummy = splitLine[1].Contains("dummy");
+
+							if (isDummy)
+							{
+								if (existingTexture != null)
+									tex = existingTexture as Texture2D;
+								else
+									tex = Texture2D.blackTexture;
+							}
+							else
+								tex = LoadTexture(Path.Combine(Directory.GetParent(materialPath).ToString(), splitLine[1].Trim()));
+	
+							tex.alphaIsTransparency = true;
 							if (tex != null && existingTexture == null)
 								thisMaterial.SetTexture("_Metallic0", tex);
 							else if (tex != null)

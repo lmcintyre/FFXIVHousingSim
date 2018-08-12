@@ -15,7 +15,7 @@ In-game there are a variety of customization options for the exterior and interi
 - Ability to place any furnishings in the interior of any house
 
 ## Current state
-The project is being actively developed by myself. It uses [ufx's fork of SaintCoinach](https://github.com/ufx/SaintCoinach) for reading game assets.
+The project is being actively developed by myself. It uses [ufx's fork of SaintCoinach](https://github.com/ufx/SaintCoinach) with a very minor fix of mine for reading game assets.
 
 Currently, the project has some functionality including (assume all functionality is incomplete):
 - Extraction of FFXIV models for use with the Unity project
@@ -26,10 +26,11 @@ Currently, the project has some functionality including (assume all functionalit
 
 ## How to use it
 0. Make sure you have the game installed and updated.
-1. Clone the repository
-2. Change all paths pointing to my local filesystem (lol) and build the launcher
-3. Select a territory and click all buttons under 'Extract' but click '__Extract Map JSON__' and '__Ext Housing JSON__' __twice__. This is what extracts models.
-4. Change all paths pointing to my local filesystem again for the Unity project, change the ward to your extracted ward in `StartupScript.cs` and click Play
-5. After a minute and a half you should have a loaded map! If you want to play around with exterior fixtures, modify the ward folder's `Landset.json` file by hand and relaunch the 'game'.
+1. Clone the repository, clone the submodule
+2. Change the string 'root' in `FFXIVHSLib.FFXIVHSPaths` to point to the folder you'd like the programs to use and build the solution.
+Hopefully you will not have to reference UnityEngine.dll manually. A post-build script copies it to the Unity project.
+3. Select a territory and click all buttons under 'Extract', but click '__Extract Map JSON__' and '__Ext Housing JSON__' __twice__. This is what extracts models.
+4. Change the ward to your extracted ward in `StartupScript.cs` and click Play
+5. After a few seconds you should have a loaded map! If you want to play around with exterior fixtures, modify the ward folder's `Landset.json` file by hand and relaunch the 'game'.
 
 The above documentation may be incorrect at any time and is untested. Visual Studio is used for the Launcher, and JetBrains Rider is used for the Unity code.

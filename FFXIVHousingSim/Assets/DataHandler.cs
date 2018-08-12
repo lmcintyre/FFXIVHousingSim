@@ -24,14 +24,6 @@ public static class DataHandler
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30
 	};
 	
-    //TODO refactor paths when directory managing implemented
-    private static string mainFolder = @"C:\Users\Liam\Desktop\trash\";
-	private static string exteriorHousingFolder = mainFolder + @"HousingExterior\";
-	private static string exteriorHousingObjectsFolder = exteriorHousingFolder + @"objects\";
-
-    private static string territoryFolder = "";
-    private static string objectsFolder = "";
-    
     //Serialized FFXIV data
     private static List<Plot> _wardInfo;
 	private static HousingExteriorStructure[] _landSet;
@@ -68,11 +60,6 @@ public static class DataHandler
 					if (!defaultGameObjects.Contains(obj))
 						UnityEngine.Object.Destroy(obj);
 
-			//Set new values for folders
-			//TODO: Refactor when directory managing implemented
-			territoryFolder = mainFolder + _territory.ToString().ToLower() + @"\";
-			objectsFolder = territoryFolder + @"objects\";
-	
 			LoadTerritory();
         }
     }
@@ -81,21 +68,21 @@ public static class DataHandler
     
     private static void LoadWardInfo()
     {
-        string jsonText = File.ReadAllText(mainFolder + "WardInfo.json");
+        string jsonText = File.ReadAllText(FFXIVHSPaths.GetWardInfoJson());
 
         _wardInfo = JsonConvert.DeserializeObject<List<Plot>>(jsonText);
     }
 
     private static void LoadExteriorFixtures()
     {
-        string jsonText = File.ReadAllText(exteriorHousingFolder + "HousingExterior.json");
+        string jsonText = File.ReadAllText(FFXIVHSPaths.GetHousingExteriorJson());
 
         _exteriorFixtures = JsonConvert.DeserializeObject<Dictionary<int, HousingExteriorFixture>>(jsonText);
     }
 
     private static void LoadExteriorBlueprints()
     {
-        string jsonText = File.ReadAllText(mainFolder + "HousingExteriorBlueprintSet.json");
+        string jsonText = File.ReadAllText(FFXIVHSPaths.GetHousingExteriorBlueprintSetJson());
 
         _blueprints = JsonConvert.DeserializeObject<HousingExteriorBlueprintSet>(jsonText);
     }
@@ -107,12 +94,13 @@ public static class DataHandler
 		
 		if (_blueprints == null)
 			LoadExteriorBlueprints();
-		
-		string landSetPath = territoryFolder + "Landset.json";
+
+		string landSetPath = FFXIVHSPaths.GetWardLandsetJson(territory);
 
 		if (!File.Exists(landSetPath))
 		{
-			_landSet = new HousingExteriorStructure[30];
+			//Main and subdivision, 60 plots
+			_landSet = new HousingExteriorStructure[60];
 			for (int i = 0; i < _landSet.Length; i++)
 			{
 				_landSet[i] = new HousingExteriorStructure();
@@ -129,10 +117,10 @@ public static class DataHandler
 			_landSet = JsonConvert.DeserializeObject<HousingExteriorStructure[]>(jsonText);
 		}
 		
-		//TODO: move this, rewrite this lol
+		//TODO: move this, rewrite this ?
 		for (int plotIndex = 0; plotIndex < _landSet.Length; plotIndex++)
 		{
-			Plot plotAt = GetPlot(_territory, plotIndex + 1, false);
+			Plot plotAt = GetPlot(_territory, plotIndex % 30 + 1, plotIndex > 29);
 			if (_landSet[plotIndex].size == Size.s)
 			{
 				//Verify possibly unset size
@@ -173,7 +161,8 @@ public static class DataHandler
 						Vector3 vrot = t.rotation.RadiansToDegreesRotation();
 
 						//SCALE STUFF BLEASE
-						//Rethink parent objects for this, maybe transform fix will make this unnecessary?
+						//Rethink parent objects for this, hopefully transform fix will make this unnecessary?
+						//Really don't want to continue with the parent object for all variant models
 						GameObject variantBaseObject = new GameObject();
 						variantBaseObject.GetComponent<Transform>().position = plotAt.position;
 						variantBaseObject.GetComponent<Transform>().rotation =
@@ -224,7 +213,7 @@ public static class DataHandler
 
     private static void LoadMapTerrainInfo()
     {
-        string jsonText = File.ReadAllText(territoryFolder + "main.json");
+        string jsonText = File.ReadAllText(FFXIVHSPaths.GetWardJson(territory));
 
         _map = JsonConvert.DeserializeObject<Map>(jsonText);
 	    Debug.Log("_map loaded.");
@@ -235,6 +224,8 @@ public static class DataHandler
         LoadMapTerrainInfo();
 
         _modelMeshes = new Dictionary<int, Mesh[]>();
+
+	    string objectsFolder = FFXIVHSPaths.GetWardObjectsDirectory(territory);
         
         foreach (MapModel model in _map.models.Values)
         {
@@ -450,6 +441,8 @@ public static class DataHandler
 		Mesh[][][] modelMeshes;
 		if (!_exteriorFixtureMeshes.TryGetValue(fixtureId, out modelMeshes))
 		{
+			string exteriorHousingObjectsFolder = FFXIVHSPaths.GetHousingExteriorObjectsDirectory();
+			
 			//Load the meshes if not found
 			HousingExteriorFixture fixture = _exteriorFixtures[fixtureId];
 
@@ -502,6 +495,7 @@ public static class DataHandler
         if (_wardInfo == null)
             LoadWardInfo();
 
+	    Debug.LogFormat("GetPlot {0} {1} {2}", ward, plotNum, subdiv);
         Plot p = _wardInfo.Where(_ => _.ward == ward &&
                                       _.index == plotNum &&
                                       _.subdiv == subdiv)
