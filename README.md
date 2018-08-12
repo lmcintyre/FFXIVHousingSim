@@ -27,10 +27,16 @@ Currently, the project has some functionality including (assume all functionalit
 ## How to use it
 0. Make sure you have the game installed and updated.
 1. Clone the repository, clone the submodule
-2. Change the string 'root' in `FFXIVHSLib.FFXIVHSPaths` to point to the folder you'd like the programs to use and build the solution.
-Hopefully you will not have to reference UnityEngine.dll manually. A post-build script copies it to the Unity project.
-3. Select a territory and click all buttons under 'Extract', but click '__Extract Map JSON__' and '__Ext Housing JSON__' __twice__. This is what extracts models.
-4. Change the ward to your extracted ward in `StartupScript.cs` and click Play
-5. After a few seconds you should have a loaded map! If you want to play around with exterior fixtures, modify the ward folder's `Landset.json` file by hand and relaunch the 'game'.
+2. Open the SaintCoinach solution and restore the NuGet packages, then build SaintCoinach.
+3. Open the FFXIVHSLauncher solution and restore the NuGet packages.
+Change the string 'root' in `FFXIVHSLib.FFXIVHSPaths` to point to the folder you'd like the programs to use and build the solution.
+If the reference to UnityEngine.dll is broken, at the top of Visual Studio, click Tools > NuGet Package Manager > Package Manager Console. Once it appears, enter `Add-Unity3DReference -AssemblyName UnityEngine -ProjectName FFXIVHSLib` and press enter. If this doesn't work, make sure you restored the NuGet packages.
+A post-build script copies FFXIVHSLib.dll to the Unity project. If this doesn't take place, copy it manually.
+4. Select a territory and click all buttons under 'Extract', but click '__Extract Map JSON__' and '__Ext Housing JSON__' __twice__. This is what extracts models.
+5. Open the Unity project by opening the folder "FFXIVHousingSim" in the root directory of the repository you cloned. Click File > Open > Navigate into Scenes > MainScene.unity.
+6. You may need to install the asset store packages used in the project. Open the asset store from Window > General > Asset Store and search for and import "json.net".
+Click Window > Package Manager. In the top left, click the "All" tab. Click Cinemachine in the left list box. Click "Install" in the top right.
+6. Change the ward to your extracted ward in `StartupScript.cs` and click Play.
+6. After a few seconds you should have a loaded map! If you want to play around with exterior fixtures, modify the ward folder's `Landset.json` file by hand and relaunch the 'game'.
 
 The above documentation may be incorrect at any time and is untested. Visual Studio is used for the Launcher, and JetBrains Rider is used for the Unity code.
