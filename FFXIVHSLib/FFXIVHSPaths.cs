@@ -38,7 +38,7 @@ namespace FFXIVHSLib
 
         public static string GetWardSettingsJson()
         {
-            string path = Path.Combine(Environment.CurrentDirectory, "WardSettings.json");
+            string path = Path.Combine(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\..\\")), "WardSettings.json");
 
             return path;
         }
