@@ -39,7 +39,7 @@ namespace FFXIVHSLauncher
             Transform t = new Transform();
             t.translation = new Vector3(translation.X, translation.Y, translation.Z);
             
-            t.rotation = new Vector3(rotation.X, rotation.Y, rotation.Z);
+            t.rotation = new Vector3(rotation.X, rotation.Y, rotation.Z).ToQuaternion();
             t.scale = new Vector3(scale.X, scale.Y, scale.Z);
             return t;
         }
@@ -606,7 +606,7 @@ namespace FFXIVHSLauncher
 
                         Vector3 lgbTranslation = gim.Header.Translation.ToLibVector3();
                         MapGroup gimMapGroup = new MapGroup(MapGroup.GroupType.SGB, GetGimmickName(gim.Name, gim.Gimmick.File.Path));
-                        gimMapGroup.groupTransform = new Transform(gim.Header.Translation.ToLibVector3(), gim.Header.Rotation.ToLibVector3(), gim.Header.Scale.ToLibVector3());
+                        gimMapGroup.groupTransform = new Transform(gim.Header.Translation.ToLibVector3(), gim.Header.Rotation.ToLibVector3().ToQuaternion(), gim.Header.Scale.ToLibVector3());
                         List<MapGroup> gimMapGroups = new List<MapGroup>();
                         List<MapModelEntry> gimMapGroupModels = new List<MapModelEntry>();
 
@@ -619,7 +619,7 @@ namespace FFXIVHSLauncher
                                 if (rootGimEntry.Gimmick != null)
                                 {
                                     MapGroup rootGimMapGroup = new MapGroup(MapGroup.GroupType.SGB, GetGimmickName(rootGimEntry.Name, rootGimEntry.Gimmick.File.Path));
-                                    rootGimMapGroup.groupTransform = new Transform(rootGimEntry.Header.Translation.ToLibVector3(), rootGimEntry.Header.Rotation.ToLibVector3(), rootGimEntry.Header.Scale.ToLibVector3());
+                                    rootGimMapGroup.groupTransform = new Transform(rootGimEntry.Header.Translation.ToLibVector3(), rootGimEntry.Header.Rotation.ToLibVector3().ToQuaternion(), rootGimEntry.Header.Scale.ToLibVector3());
                                     List<MapGroup> rootGimMapGroups = new List<MapGroup>();
                                     List<MapModelEntry> rootGimMapGroupModels = new List<MapModelEntry>();
 
@@ -640,7 +640,7 @@ namespace FFXIVHSLauncher
                                         foreach (var subGimEntry in subGimGroup.Entries.OfType<SgbGimmickEntry>())
                                         {
                                             MapGroup subGimMapGroup = new MapGroup(MapGroup.GroupType.SGB, GetGimmickName(subGimEntry.Name, subGimEntry.Gimmick.File.Path));
-                                            subGimMapGroup.groupTransform = new Transform(subGimEntry.Header.Translation.ToLibVector3(), subGimEntry.Header.Rotation.ToLibVector3(), subGimEntry.Header.Scale.ToLibVector3());
+                                            subGimMapGroup.groupTransform = new Transform(subGimEntry.Header.Translation.ToLibVector3(), subGimEntry.Header.Rotation.ToLibVector3().ToQuaternion(), subGimEntry.Header.Scale.ToLibVector3());
                                             List<MapModelEntry> subGimMapGroupModels = new List<MapModelEntry>();
 
                                             Matrix subGimTMatrix = MatrixFromVectors(subGimEntry.Header.Translation,

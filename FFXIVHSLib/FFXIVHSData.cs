@@ -162,20 +162,20 @@ namespace FFXIVHSLib
     public class Transform
     {
         public Vector3 translation { get; set; }
-        public Vector3 rotation { get; set; }
+        public Quaternion rotation { get; set; }
         public Vector3 scale { get; set; }
 
         public static Transform Empty =
-            new Transform(new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(1, 1, 1));
+            new Transform(new Vector3(0, 0, 0), new Quaternion(0, 0, 0, 1), new Vector3(1, 1, 1));
 
         public Transform()
         {
             translation = new Vector3();
-            rotation = new Vector3();
+            rotation = new Quaternion();
             scale = new Vector3();
         }
 
-        public Transform(Vector3 translation, Vector3 rotation, Vector3 scale)
+        public Transform(Vector3 translation, Quaternion rotation, Vector3 scale)
         {
             this.translation = translation;
             this.rotation = rotation;

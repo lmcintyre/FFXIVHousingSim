@@ -66,7 +66,6 @@ namespace FFXIVHSLauncher
                     vc.W = tv.Color.Value.W;
                     vc.Z = tv.Color.Value.Z;
                 }
-                
 
                 vt.X = tv.UV.Value.X;
                 vt.Y = -1 * tv.UV.Value.Y;

@@ -164,7 +164,7 @@ public static class DataHandler
 					foreach (FFXIVHSLib.Transform t in blueprint.fixtureTransforms[fixtureType][variantIndex])
 					{
 						Vector3 pos = t.translation;
-						Vector3 vrot = t.rotation.RadiansToDegreesRotation();
+						Vector3 vrot = t.rotation.ToVector3();
 
 						//SCALE STUFF BLEASE
 						//Rethink parent objects for this, hopefully transform fix will make this unnecessary?
@@ -189,12 +189,12 @@ public static class DataHandler
 
 							//variant transform + model's transform + plot transform
 							Vector3 newPos = pos + modelTransform.translation;
-							Vector3 newvRot = vrot + modelTransform.rotation.RadiansToDegreesRotation();
+							Vector3 newvRot = vrot + modelTransform.rotation.ToVector3();
 							Quaternion newRot = Quaternion.Euler(newvRot);
 							GameObject addedModel = UnityEngine.Object.Instantiate(obj);
 							addedModel.GetComponent<Transform>().SetParent(variantBaseObject.GetComponent<Transform>());
 							addedModel.GetComponent<Transform>().localPosition = pos + modelTransform.translation;
-							addedModel.GetComponent<Transform>().localRotation = Quaternion.Euler(newvRot + modelTransform.rotation.RadiansToDegreesRotation());
+							addedModel.GetComponent<Transform>().localRotation = Quaternion.Euler(newvRot + modelTransform.rotation.ToVector3());
 							addedModel.GetComponent<Transform>().localScale = t.scale;
 							
 							//FixFFXIVObjectTransform(addedModel);
@@ -267,17 +267,19 @@ public static class DataHandler
 
 		if (parent == null)
 		{
-			groupRootObject.GetComponent<Transform>().position = group.groupTransform.translation;
-			groupRootObject.GetComponent<Transform>().rotation = Quaternion.Euler(group.groupTransform.rotation.RadiansToDegreesRotation());
-			groupRootObject.GetComponent<Transform>().localScale = group.groupTransform.scale;
+			groupRootObject.GetComponent<Transform>().position = Vector3.Reflect(group.groupTransform.translation, Vector3.left);
+			groupRootObject.GetComponent<Transform>().rotation = Quaternion.Euler(Vector3.Reflect(group.groupTransform.rotation.ToVector3(), Vector3.left));
+			groupRootObject.GetComponent<Transform>().localScale = Vector3.Reflect(group.groupTransform.scale, Vector3.left);
 		}
 		else
 		{
 			groupRootObject.GetComponent<Transform>().SetParent(parent.GetComponent<Transform>());
 			groupRootObject.GetComponent<Transform>().localPosition = group.groupTransform.translation;
-			groupRootObject.GetComponent<Transform>().localRotation = Quaternion.Euler(group.groupTransform.rotation.RadiansToDegreesRotation());
+			groupRootObject.GetComponent<Transform>().localRotation = group.groupTransform.rotation;
 			groupRootObject.GetComponent<Transform>().localScale = group.groupTransform.scale;
 		}
+		
+		
 
 		groupRootObject.SetActive(true);
 		
@@ -290,7 +292,7 @@ public static class DataHandler
 
 				obj.GetComponent<Transform>().SetParent(groupRootObject.GetComponent<Transform>());
 				obj.GetComponent<Transform>().localPosition = entry.transform.translation;
-				obj.GetComponent<Transform>().localRotation = Quaternion.Euler(entry.transform.rotation.RadiansToDegreesRotation());
+				obj.GetComponent<Transform>().localRotation = entry.transform.rotation;
 				obj.GetComponent<Transform>().localScale = entry.transform.scale;
 				obj.SetActive(true);
 			}	

@@ -27,7 +27,21 @@ namespace FFXIVHSLauncher
 //                entryTransform.translation += new Vector3(parentTranslation.x, parentTranslation.y, parentTranslation.z);
             entryTransform.scale = new Vector3(t.Scale.X, t.Scale.Y, t.Scale.Z);
             //entryTransform.rotation = finalTransform.ExtractRotationQuaternion();
-            entryTransform.rotation = new Vector3(t.Rotation.X, t.Rotation.Y, t.Rotation.Z);
+
+            Quaternion test1 = ExtractRotationQuaternion(finalTransform);
+
+            Matrix mTest2 = Matrix.Identity *
+                            Matrix.RotationX(t.Rotation.X) *
+                            Matrix.RotationY(t.Rotation.Y) *
+                            Matrix.RotationZ(t.Rotation.Z);
+            Quaternion test2 = ExtractRotationQuaternion(mTest2);
+
+            Matrix mTest3 = Matrix.RotationX(t.Rotation.X) *
+                            Matrix.RotationY(t.Rotation.Y) *
+                            Matrix.RotationZ(t.Rotation.Z);
+            Quaternion test3 = ExtractRotationQuaternion(mTest3);
+
+            entryTransform.rotation = test2;
 
             //Fix for map reflection
 //            entryTransform.translation = new Vector3(entryTransform.translation.x * -1,
