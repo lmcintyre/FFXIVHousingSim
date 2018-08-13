@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Object = System.Object;
 using Transform = UnityEngine.Transform;
 using Vector3 = UnityEngine.Vector3;
+using Quaternion = UnityEngine.Quaternion;
 
 /// <summary>
 /// Handles all extracted FFXIV data.
@@ -18,6 +19,8 @@ public static class DataHandler
 	private static bool DebugLoadMap = true;
 	private static bool DebugCustomLoad = false;
 
+	private static bool DebugLoadExteriors = false;
+	
 	//Implement
 	private static int[] debugCustomLoadList = new[]
 	{
@@ -89,6 +92,9 @@ public static class DataHandler
 
 	private static void LoadLandset()
 	{
+		if (!DebugLoadExteriors)
+			return;
+			
 		if (_exteriorFixtures == null)
 			LoadExteriorFixtures();
 		
@@ -165,10 +171,9 @@ public static class DataHandler
 						//Really don't want to continue with the parent object for all variant models
 						GameObject variantBaseObject = new GameObject();
 						variantBaseObject.GetComponent<Transform>().position = plotAt.position;
-						variantBaseObject.GetComponent<Transform>().rotation =
-							Quaternion.Euler(plotAt.rotation.RadiansToDegreesRotation());
+						variantBaseObject.GetComponent<Transform>().rotation = plotAt.rotation;
 						variantBaseObject.GetComponent<Transform>().localScale = Vector3.Reflect(Vector3.one, Vector3.left);
-						FixFFXIVObjectTransform(variantBaseObject);
+						//FixFFXIVObjectTransform(variantBaseObject);
 						variantBaseObject.name = string.Format("bp{0}_ft{1}_v{2}", _landSet[plotIndex].size, fixtureType, variantIndex);
 						
 						for (int modelIndex = 0; modelIndex < objects.Length; modelIndex++)
@@ -247,27 +252,59 @@ public static class DataHandler
 	    {
 		    LoadMapMeshes();
 		
-		    foreach (MapModelEntry entry in _map.modelEntries.Values)
-		    {	
-			    //Add mesh, handles materials
-			    Mesh[] meshes = _modelMeshes[entry.modelId];
-			    GameObject obj = AddMeshToNewGameObject(meshes, true);
-
-			    obj.GetComponent<Transform>().position = entry.transform.translation;
-			    obj.GetComponent<Transform>().rotation = Quaternion.Euler(entry.transform.rotation.RadiansToDegreesRotation());
-			    obj.GetComponent<Transform>().localScale = entry.transform.scale;
-			    
-			    FixFFXIVObjectTransform(obj);
-
-			    Vector3 pos = obj.GetComponent<Transform>().position;
-			    pos = Vector3.Reflect(pos, Vector3.left);
-			    obj.GetComponent<Transform>().position = pos;
-			    obj.SetActive(true);
-		    }
+		    foreach (MapGroup group in _map.groups.Values)
+		    {
+			    LoadMapGroup(group);
+			}
 	    }
 	    
 	    LoadLandset();
     }
+
+	private static void LoadMapGroup(MapGroup group, GameObject parent = null)
+	{
+		GameObject groupRootObject = new GameObject(group.groupName);
+
+		if (parent == null)
+		{
+			groupRootObject.GetComponent<Transform>().position = group.groupTransform.translation;
+			groupRootObject.GetComponent<Transform>().rotation = Quaternion.Euler(group.groupTransform.rotation.RadiansToDegreesRotation());
+			groupRootObject.GetComponent<Transform>().localScale = group.groupTransform.scale;
+		}
+		else
+		{
+			groupRootObject.GetComponent<Transform>().SetParent(parent.GetComponent<Transform>());
+			groupRootObject.GetComponent<Transform>().localPosition = group.groupTransform.translation;
+			groupRootObject.GetComponent<Transform>().localRotation = Quaternion.Euler(group.groupTransform.rotation.RadiansToDegreesRotation());
+			groupRootObject.GetComponent<Transform>().localScale = group.groupTransform.scale;
+		}
+
+		groupRootObject.SetActive(true);
+		
+		if (group.entries != null && group.entries.Length > 0)
+		{
+			foreach (MapModelEntry entry in group.entries)
+			{
+				Mesh[] meshes = _modelMeshes[entry.modelId];
+				GameObject obj = AddMeshToNewGameObject(meshes, true);
+
+				obj.GetComponent<Transform>().SetParent(groupRootObject.GetComponent<Transform>());
+				obj.GetComponent<Transform>().localPosition = entry.transform.translation;
+				obj.GetComponent<Transform>().localRotation = Quaternion.Euler(entry.transform.rotation.RadiansToDegreesRotation());
+				obj.GetComponent<Transform>().localScale = entry.transform.scale;
+				obj.SetActive(true);
+			}	
+		}
+
+		if (group.groups != null && group.groups.Length > 0)
+		{
+			foreach (MapGroup subGroup in group.groups)
+			{
+				if (subGroup != null)
+					LoadMapGroup(subGroup, groupRootObject);
+			}	
+		}
+	}
 
 	private static void AddMeshToGameObject(Mesh[] meshes, GameObject obj)
 	{
@@ -404,30 +441,46 @@ public static class DataHandler
 		obj.SetActive(false);
 		return obj;
 	}
-
+	
 	private static void FixFFXIVObjectTransform(GameObject obj)
 	{
 		//Get vectors for transform
-		Vector3 vrot = obj.GetComponent<Transform>().rotation.eulerAngles;
+		Vector3 trans = obj.GetComponent<Transform>().position;
+		Vector3 vrot = obj.GetComponent<Transform>().eulerAngles;
 		Vector3 scal = obj.GetComponent<Transform>().localScale;
 	    
-		vrot = Vector3.Reflect(vrot, Vector3.down);
+		trans = Vector3.Reflect(trans, Vector3.left);
 		vrot = Vector3.Reflect(vrot, Vector3.left);
-		Quaternion rot = Quaternion.Euler(vrot);
-		
-		float yrot = rot.eulerAngles.y;
-		
-		if (yrot < 0)
-			yrot = 360 + yrot;
-		
 		scal = Vector3.Reflect(scal, Vector3.left);
 
-		if (yrot > 90f && yrot < 270f)
-			rot = Quaternion.Euler(Vector3.Reflect(rot.eulerAngles, Vector3.down));
-
-		obj.GetComponent<Transform>().rotation = rot;
+		obj.GetComponent<Transform>().localPosition = trans;
+		obj.GetComponent<Transform>().localRotation = Quaternion.Euler(vrot);
 		obj.GetComponent<Transform>().localScale = scal;
 	}
+
+//	private static void FixFFXIVObjectTransform(GameObject obj)
+//	{
+//		//Get vectors for transform
+//		Vector3 vrot = obj.GetComponent<Transform>().rotation.eulerAngles;
+//		Vector3 scal = obj.GetComponent<Transform>().localScale;
+//	    
+//		vrot = Vector3.Reflect(vrot, Vector3.down);
+//		vrot = Vector3.Reflect(vrot, Vector3.left);
+//		Quaternion rot = Quaternion.Euler(vrot);
+//		
+//		float yrot = rot.eulerAngles.y;
+//		
+//		if (yrot < 0)
+//			yrot = 360 + yrot;
+//		
+//		scal = Vector3.Reflect(scal, Vector3.left);
+//
+//		if (yrot > 90f && yrot < 270f)
+//			rot = Quaternion.Euler(Vector3.Reflect(rot.eulerAngles, Vector3.down));
+//
+//		obj.GetComponent<Transform>().rotation = rot;
+//		obj.GetComponent<Transform>().localScale = scal;
+//	}
 	
 	private static Mesh[][][] GetMeshesForExteriorFixture(int fixtureId, ref FFXIVHSLib.Transform[][] transformsPerModel)
 	{

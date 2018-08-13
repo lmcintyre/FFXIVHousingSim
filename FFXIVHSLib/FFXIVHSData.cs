@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using SharpDX;
 using UnityEngine;
 
 namespace FFXIVHSLib
@@ -101,6 +102,61 @@ namespace FFXIVHSLib
             v.z *= Mathf.Rad2Deg;
             return v;
         }
+
+        public Quaternion ToQuaternion()
+        {
+            Matrix m = Matrix.Identity *
+                       Matrix.RotationX(x) *
+                       Matrix.RotationY(y) *
+                       Matrix.RotationZ(z);
+
+            SharpDX.Quaternion dxQuat = SharpDX.Quaternion.RotationMatrix(m);
+
+            return new Quaternion(dxQuat.X, dxQuat.Y, dxQuat.Z, dxQuat.W);
+        }
+    }
+
+    public class Quaternion
+    {
+        public float x;
+        public float y;
+        public float z;
+        public float w;
+
+        public Quaternion()
+        {
+
+        }
+
+        public Quaternion(float x, float y, float z, float w)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.w = w;
+        }
+
+        public static implicit operator UnityEngine.Quaternion(Quaternion q)
+        {
+            return new UnityEngine.Quaternion(q.x, q.y, q.z, q.w);
+        }
+
+        public static implicit operator SharpDX.Quaternion(Quaternion q)
+        {
+            return new SharpDX.Quaternion(q.x, q.y, q.z, q.w);
+        }
+
+        /// <summary>
+        /// Cannot be called from outside of Unity code.
+        /// </summary>
+        /// <param name="q"></param>
+        /// <returns></returns>
+        public Vector3 ToVector3()
+        {
+            UnityEngine.Vector3 euler = ((UnityEngine.Quaternion) this).eulerAngles;
+            Vector3 vector = new Vector3(euler.x, euler.y, euler.z);
+            return vector;
+        }
     }
 
     public class Transform
@@ -109,11 +165,21 @@ namespace FFXIVHSLib
         public Vector3 rotation { get; set; }
         public Vector3 scale { get; set; }
 
+        public static Transform Empty =
+            new Transform(new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(1, 1, 1));
+
         public Transform()
         {
             translation = new Vector3();
             rotation = new Vector3();
             scale = new Vector3();
+        }
+
+        public Transform(Vector3 translation, Vector3 rotation, Vector3 scale)
+        {
+            this.translation = translation;
+            this.rotation = rotation;
+            this.scale = scale;
         }
 
         public override bool Equals(object obj)
@@ -149,27 +215,24 @@ namespace FFXIVHSLib
     public class Map
     {
         /// <summary>
-        /// Handles the modelEntries of the map and their positions.
+        /// Handles the groups of the map and their positions.
         /// </summary>
-        public Dictionary<int, MapModelEntry> modelEntries { get; set; }
+        public Dictionary<int, MapGroup> groups { get; set; }
 
         /// <summary>
         /// Maps a first-come, first-serve ID to each unique model.
         /// </summary>
         public Dictionary<int, MapModel> models { get; set; }
 
-        public void AddMapModelEntry(MapModelEntry entry)
+        public void AddMapGroup(MapGroup group)
         {
-            if (modelEntries == null)
-                modelEntries = new Dictionary<int, MapModelEntry>();
-
-            if (!models.ContainsKey(entry.modelId))
-                throw new KeyNotFoundException();
-
-            int id = modelEntries.Keys.Count;
+            if (groups == null)
+                groups = new Dictionary<int, MapGroup>();
             
-            entry.id = id;
-            modelEntries.Add(id, entry);
+            int id = groups.Keys.Count;
+            
+            group.id = id;
+            groups.Add(id, group);
         }
 
         /// <summary>
@@ -194,6 +257,34 @@ namespace FFXIVHSLib
             models.Add(id, model);
             return id;
         }
+    }
+
+    public class MapGroup
+    {
+        public enum GroupType
+        {
+            LGB, SGB, TERRAIN
+        }
+
+        public int id;
+        public GroupType type;
+        public string groupName;
+        public Transform groupTransform;
+
+        public MapGroup[] groups;
+        public MapModelEntry[] entries;
+
+        public MapGroup()
+        {
+
+        }
+
+        public MapGroup(GroupType t, string name)
+        {
+            type = t;
+            groupName = name;
+        }
+
     }
 
     /// <summary>
@@ -243,7 +334,7 @@ namespace FFXIVHSLib
         public byte index { get; set; }
         public Size size { get; set; }
         public Vector3 position { get; set; }
-        public Vector3 rotation { get; set; }
+        public Quaternion rotation { get; set; }
 
         public Plot() { }
 

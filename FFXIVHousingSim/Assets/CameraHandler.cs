@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Experimental.UIElements;
 using Vector3 = UnityEngine.Vector3;
+using Quaternion = UnityEngine.Quaternion;
 
 [RequireComponent(typeof(Camera))]
 public class CameraHandler : MonoBehaviour

@@ -15,7 +15,7 @@ namespace FFXIVHSLib
     public static class FFXIVHSPaths
     {
         //TODO decide on a main path or make it like a setting or something
-        private const string root = @"C:\Users\Liam\Desktop\trash\paths\";
+        private const string root = @"C:\Users\Liam\Desktop\trash\matrix-test\";
         private const string GameDirectory = @"C:\Program Files (x86)\SquareEnix\FINAL FANTASY XIV - A Realm Reborn\";
 
         private static void CreateDirectoryIfNotExists(string path)

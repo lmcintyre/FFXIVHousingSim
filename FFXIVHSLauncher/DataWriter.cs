@@ -9,10 +9,12 @@ using SaintCoinach.Graphics;
 using SaintCoinach.Graphics.Lgb;
 using SaintCoinach.Graphics.Sgb;
 using SaintCoinach.Xiv;
-using File = System.IO.File;
 using FFXIVHSLib;
+using SharpDX;
+using File = System.IO.File;
 using Directory = System.IO.Directory;
 using Map = FFXIVHSLib.Map;
+using Quaternion = FFXIVHSLib.Quaternion;
 using Vector3 = FFXIVHSLib.Vector3;
 
 
@@ -30,17 +32,44 @@ namespace FFXIVHSLauncher
         /// <param name="rotation"></param>
         /// <param name="scale"></param>
         /// <returns></returns>
-        private static Transform TransformFromVectors(SaintCoinach.Graphics.Vector3 translation,
-            SaintCoinach.Graphics.Vector3 rotation,
-            SaintCoinach.Graphics.Vector3 scale)
+        public static Transform TransformFromVectors(SaintCoinach.Graphics.Vector3 translation,
+                                                        SaintCoinach.Graphics.Vector3 rotation,
+                                                        SaintCoinach.Graphics.Vector3 scale)
         {
             Transform t = new Transform();
             t.translation = new Vector3(translation.X, translation.Y, translation.Z);
+            
             t.rotation = new Vector3(rotation.X, rotation.Y, rotation.Z);
             t.scale = new Vector3(scale.X, scale.Y, scale.Z);
             return t;
         }
-        
+
+        public static Matrix MatrixFromVectors(SaintCoinach.Graphics.Vector3 translation,
+                                                SaintCoinach.Graphics.Vector3 rotation,
+                                                SaintCoinach.Graphics.Vector3 scale)
+        {
+            return (Matrix.Scaling(scale.ToDx())
+                    * Matrix.RotationX(rotation.X)
+                    * Matrix.RotationY(rotation.Y)
+                    * Matrix.RotationZ(rotation.Z)
+                    * Matrix.Translation(translation.ToDx()));
+        }
+
+//        public static Transform TransformFromDxMatrix(Matrix m)
+//        {
+//            Transform t = new Transform();
+//
+//            SharpDX.Vector3 dxTrans = m.TranslationVector;
+//            SharpDX.Quaternion dxRotQuat = m.ExtractRotationQuaternion();
+//            SharpDX.Vector3 dxScale = m.ScaleVector;
+//
+//            t.translation = new Vector3(dxTrans.X, dxTrans.Y, dxTrans.Y);
+//            t.rotation = m.ExtractRotationQuaternion();
+//            t.scale = new Vector3(dxScale.X, dxScale.Y, dxScale.Z);
+//
+//            return t;
+//        }
+
         /// <summary>
         /// Occurs first in the ward data output flow and populates plots with the sizes of
         /// the appropriate plots from the sheet HousingLandSet.
@@ -156,7 +185,7 @@ namespace FFXIVHSLauncher
                                         SaintCoinach.Graphics.Vector3 position = lgbGimmickEntry.Header.Translation;
                                         SaintCoinach.Graphics.Vector3 rotation = lgbGimmickEntry.Header.Rotation;
                                         Vector3 pos = new Vector3(position.X * -1, position.Y, position.Z);
-                                        Vector3 rot = new Vector3(rotation.X, rotation.Y, rotation.Z);
+                                        Quaternion rot = new Vector3(rotation.X, rotation.Y, rotation.Z).ToQuaternion();
 
                                         mainPlotList[plotIndex].position = pos;
                                         mainPlotList[plotIndex].rotation = rot;
@@ -182,7 +211,7 @@ namespace FFXIVHSLauncher
                                         SaintCoinach.Graphics.Vector3 position = lgbGimmickEntry.Header.Translation;
                                         SaintCoinach.Graphics.Vector3 rotation = lgbGimmickEntry.Header.Rotation;
                                         Vector3 pos = new Vector3(position.X * -1, position.Y, position.Z);
-                                        Vector3 rot = new Vector3(rotation.X, rotation.Y, rotation.Z);
+                                        Quaternion rot = new Vector3(rotation.X, rotation.Y, rotation.Z).ToQuaternion();
 
                                         subdivPlotList[plotIndex].position = pos;
                                         subdivPlotList[plotIndex].rotation = rot;
@@ -511,7 +540,7 @@ namespace FFXIVHSLauncher
         }
 
         /// <summary>
-        /// Returns a Map containing all modelEntries in the Territory instantiated via
+        /// Returns a Map containing all groups in the Territory instantiated via
         /// the given TerritoryType as MapModelEntry objects.
         /// </summary>
         /// <param name="teriType"></param>
@@ -520,15 +549,27 @@ namespace FFXIVHSLauncher
         {
             Map map = new Map();
             Territory teri = new Territory(teriType);
-
+            Matrix identityMatrix = Matrix.Identity;
+                        
             if (teri.Terrain != null)
             {
+                MapGroup terrainMapGroup = new MapGroup(MapGroup.GroupType.TERRAIN, "teri");
+                terrainMapGroup.groupTransform = Transform.Empty;
+                List<MapModelEntry> terrainMapGroupModels = new List<MapModelEntry>();
+
                 foreach (TransformedModel mdl in teri.Terrain.Parts)
                 {
                     int modelId = map.TryAddUniqueModel(mdl.Model.ToMapModel());
-                    map.AddMapModelEntry(mdl.ToMapModelEntry(modelId));
+                    Matrix lgbTMatrix = MatrixFromVectors(mdl.Translation, mdl.Rotation, mdl.Scale);
+                    terrainMapGroupModels.Add(mdl.ToMapModelEntry(modelId, ref lgbTMatrix,
+                                                                            ref identityMatrix,
+                                                                            ref identityMatrix,
+                                                                            ref identityMatrix));
                 }
+                terrainMapGroup.entries = terrainMapGroupModels.ToArray();
+                map.AddMapGroup(terrainMapGroup);
             }
+            
             
             /* ???
             if (teri.LgbFiles.Length == 0)
@@ -540,47 +581,129 @@ namespace FFXIVHSLauncher
 
                 foreach (LgbGroup lgbGroup in validGroups)
                 {
+                    MapGroup lgbMapGroup = new MapGroup(MapGroup.GroupType.LGB, lgbGroup.Name);
+                    lgbMapGroup.groupTransform = Transform.Empty;
+                    List<MapGroup> lgbMapGroups = new List<MapGroup>();
+                    List<MapModelEntry> lgbMapGroupModels = new List<MapModelEntry>();
+                    
                     foreach (var mdl in lgbGroup.Entries.OfType<LgbModelEntry>())
                     {
-                        //TransformedModels do not inherit LgbModelEntry header transform data
+                        Matrix lgbTMatrix = MatrixFromVectors(mdl.Header.Translation,
+                                                                mdl.Header.Rotation,
+                                                                mdl.Header.Scale);
                         int modelId = map.TryAddUniqueModel(mdl.Model.Model.ToMapModel());
-                        map.AddMapModelEntry(mdl.Model.ToMapModelEntry(modelId));
+                        lgbMapGroupModels.Add(mdl.Model.ToMapModelEntry(modelId, ref lgbTMatrix,
+                                                                                ref identityMatrix,
+                                                                                ref identityMatrix,
+                                                                                ref identityMatrix));
                     }
 
                     foreach (var gim in lgbGroup.Entries.OfType<LgbGimmickEntry>())
                     {
-                        Transform t = TransformFromVectors(gim.Header.Translation, gim.Header.Rotation,
-                            gim.Header.Scale);
-                        ParseRecursiveSgb(gim.Gimmick, t, ref map);
-                    }
+                        Matrix lgbTMatrix = MatrixFromVectors(gim.Header.Translation,
+                                                                gim.Header.Rotation,
+                                                                gim.Header.Scale);
 
+                        Vector3 lgbTranslation = gim.Header.Translation.ToLibVector3();
+                        MapGroup gimMapGroup = new MapGroup(MapGroup.GroupType.SGB, GetGimmickName(gim.Name, gim.Gimmick.File.Path));
+                        gimMapGroup.groupTransform = new Transform(gim.Header.Translation.ToLibVector3(), gim.Header.Rotation.ToLibVector3(), gim.Header.Scale.ToLibVector3());
+                        List<MapGroup> gimMapGroups = new List<MapGroup>();
+                        List<MapModelEntry> gimMapGroupModels = new List<MapModelEntry>();
+
+                        AddSgbModelsToMap(ref map, ref gimMapGroupModels, gim.Gimmick, ref lgbTMatrix, ref identityMatrix, ref identityMatrix, lgbTranslation);
+
+                        foreach (var rootGimGroup in gim.Gimmick.Data.OfType<SgbGroup>())
+                        {
+                            foreach (var rootGimEntry in rootGimGroup.Entries.OfType<SgbGimmickEntry>())
+                            {
+                                if (rootGimEntry.Gimmick != null)
+                                {
+                                    MapGroup rootGimMapGroup = new MapGroup(MapGroup.GroupType.SGB, GetGimmickName(rootGimEntry.Name, rootGimEntry.Gimmick.File.Path));
+                                    rootGimMapGroup.groupTransform = new Transform(rootGimEntry.Header.Translation.ToLibVector3(), rootGimEntry.Header.Rotation.ToLibVector3(), rootGimEntry.Header.Scale.ToLibVector3());
+                                    List<MapGroup> rootGimMapGroups = new List<MapGroup>();
+                                    List<MapModelEntry> rootGimMapGroupModels = new List<MapModelEntry>();
+
+                                    Matrix rootGimTMatrix = MatrixFromVectors(rootGimEntry.Header.Translation,
+                                                                                rootGimEntry.Header.Rotation,
+                                                                                rootGimEntry.Header.Scale);
+
+                                    Vector3 rootGimTranslation = rootGimEntry.Header.Translation.ToLibVector3();
+
+                                    AddSgbModelsToMap(ref map, ref rootGimMapGroupModels, rootGimEntry.Gimmick, ref lgbTMatrix,
+                                                                                                                ref rootGimTMatrix,
+                                                                                                                ref identityMatrix,
+                                                                                                                lgbTranslation + 
+                                                                                                                rootGimTranslation);
+                                    
+                                    foreach (var subGimGroup in rootGimEntry.Gimmick.Data.OfType<SgbGroup>())
+                                    {
+                                        foreach (var subGimEntry in subGimGroup.Entries.OfType<SgbGimmickEntry>())
+                                        {
+                                            MapGroup subGimMapGroup = new MapGroup(MapGroup.GroupType.SGB, GetGimmickName(subGimEntry.Name, subGimEntry.Gimmick.File.Path));
+                                            subGimMapGroup.groupTransform = new Transform(subGimEntry.Header.Translation.ToLibVector3(), subGimEntry.Header.Rotation.ToLibVector3(), subGimEntry.Header.Scale.ToLibVector3());
+                                            List<MapModelEntry> subGimMapGroupModels = new List<MapModelEntry>();
+
+                                            Matrix subGimTMatrix = MatrixFromVectors(subGimEntry.Header.Translation,
+                                                                                subGimEntry.Header.Rotation,
+                                                                                subGimEntry.Header.Scale);
+
+                                            Vector3 subGimTranslation = subGimEntry.Header.Translation.ToLibVector3();
+
+                                            AddSgbModelsToMap(ref map, ref subGimMapGroupModels, subGimEntry.Gimmick, ref lgbTMatrix,
+                                                                                                                        ref rootGimTMatrix,
+                                                                                                                        ref subGimTMatrix,
+                                                                                                                        lgbTranslation + 
+                                                                                                                        rootGimTranslation + 
+                                                                                                                        subGimTranslation);
+
+                                            subGimMapGroup.entries = subGimMapGroupModels.ToArray();
+                                            rootGimMapGroups.Add(subGimMapGroup);
+                                        }
+                                    }
+                                    rootGimMapGroup.groups = rootGimMapGroups.ToArray();
+                                    rootGimMapGroup.entries = rootGimMapGroupModels.ToArray();
+                                    gimMapGroups.Add(rootGimMapGroup);
+                                }
+                            }
+                        }
+                        gimMapGroup.groups = gimMapGroups.ToArray();
+                        gimMapGroup.entries = gimMapGroupModels.ToArray();
+                        lgbMapGroups.Add(gimMapGroup);
+                    }
+                    lgbMapGroup.groups = lgbMapGroups.ToArray();
+                    lgbMapGroup.entries = lgbMapGroupModels.ToArray();
+                    map.AddMapGroup(lgbMapGroup);
                 }
             }
 
             return map;
         }
 
+        private static string GetGimmickName(string gimmickName, string gimmickPath)
+        {
+            if (String.IsNullOrEmpty(gimmickName))
+            {
+                return gimmickPath.Substring(gimmickPath.LastIndexOf('\\') + 1).Replace(".sgb", "");
+            }
+            return gimmickName;
+        }
+
         /// <summary>
-        /// Parses an SgbFile for model entries or further gimmicks, and adds modelEntries
+        /// Parses an SgbFile for model entries or further gimmicks, and adds groups
         /// to the given List&lt;MapModelEntry&gt;.
         /// </summary>
         /// <param name="file"></param>
         /// <param name="parent"></param>
         /// <param name="models"></param>
-        private static void ParseRecursiveSgb(SgbFile file, Transform parent, ref Map map)
+        private static void AddSgbModelsToMap(ref Map map, ref List<MapModelEntry> groupModels, SgbFile file, ref Matrix lgbTMatrix, ref Matrix rootGimTMatrix, ref Matrix thisGimTMatrix, Vector3 parentTranslation = null)
         {
             foreach (var sgbGroup in file.Data.OfType<SgbGroup>())
             {
                 foreach (var mdl in sgbGroup.Entries.OfType<SgbModelEntry>())
                 {
+                    Matrix modelTMatrix = MatrixFromVectors(mdl.Header.Translation, mdl.Header.Rotation, mdl.Header.Scale);
                     int modelId = map.TryAddUniqueModel(mdl.Model.Model.ToMapModel());
-                    map.AddMapModelEntry(mdl.Model.ToMapModelEntry(modelId, parent));
-                }
-                
-                foreach (var gim in sgbGroup.Entries.OfType<SgbGimmickEntry>())
-                {
-                    Transform p = TransformFromVectors(gim.Header.Translation, gim.Header.Rotation, gim.Header.Scale);
-                    ParseRecursiveSgb(gim.Gimmick, p, ref map);
+                    groupModels.Add(mdl.Model.ToMapModelEntry(modelId, ref lgbTMatrix, ref rootGimTMatrix, ref thisGimTMatrix, ref modelTMatrix, parentTranslation));
                 }
             }
         }
@@ -715,6 +838,50 @@ namespace FFXIVHSLauncher
                 if (realm.Packs.TryGetFile(model.modelPath, out SaintCoinach.IO.File f))
                     ObjectFileWriter.WriteObjectFile(outpath, (ModelFile)f);
             }
+        }
+    }
+
+    public static class VectorConverter
+    {
+        public static SharpDX.Vector3 ToDx(this SaintCoinach.Graphics.Vector3 self)
+        {
+            return new SharpDX.Vector3
+            {
+                X = self.X,
+                Y = self.Y,
+                Z = self.Z
+            };
+        }
+        public static SharpDX.Vector3 ToDx(this SaintCoinach.Graphics.Vector3? self, SharpDX.Vector3 defaultValue)
+        {
+            if (self.HasValue)
+                return self.Value.ToDx();
+            return defaultValue;
+        }
+        public static SharpDX.Vector4 ToDx(this SaintCoinach.Graphics.Vector4 self)
+        {
+            return new SharpDX.Vector4
+            {
+                X = self.X,
+                Y = self.Y,
+                Z = self.Z,
+                W = self.W
+            };
+        }
+        public static SharpDX.Vector3 ToDx3(this SaintCoinach.Graphics.Vector4 self)
+        {
+            return new SharpDX.Vector3
+            {
+                X = self.X,
+                Y = self.Y,
+                Z = self.Z
+            };
+        }
+        public static SharpDX.Vector4 ToDx(this SaintCoinach.Graphics.Vector4? self, SharpDX.Vector4 defaultValue)
+        {
+            if (self.HasValue)
+                return self.Value.ToDx();
+            return defaultValue;
         }
     }
 }

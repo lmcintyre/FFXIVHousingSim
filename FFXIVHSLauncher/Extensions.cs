@@ -1,29 +1,38 @@
 ﻿using System.IO;
 using FFXIVHSLib;
 using SaintCoinach.Graphics;
+using SharpDX;
+using Quaternion = FFXIVHSLib.Quaternion;
 using Vector3 = FFXIVHSLib.Vector3;
 
 namespace FFXIVHSLauncher
 {
     static class Extensions
     {
-        public static MapModelEntry ToMapModelEntry(this TransformedModel t, int modelId, Transform parent = null)
+        public static MapModelEntry ToMapModelEntry(this TransformedModel t, int modelId,
+                                                    ref Matrix lgbTMatrix,
+                                                    ref Matrix rootGimTMatrix,
+                                                    ref Matrix thisGimTMatrix,
+                                                    ref Matrix modelTMatrix,
+                                                    Vector3 parentTranslation = null)
         {
             MapModelEntry m = new MapModelEntry();
-
             m.modelId = modelId;
+
+            Matrix finalTransform = modelTMatrix * rootGimTMatrix * thisGimTMatrix * lgbTMatrix;
 
             Transform entryTransform = new Transform();
             entryTransform.translation = new Vector3(t.Translation.X, t.Translation.Y, t.Translation.Z);
-            entryTransform.rotation = new Vector3(t.Rotation.X, t.Rotation.Y, t.Rotation.Z);
+//            if (parentTranslation != null)
+//                entryTransform.translation += new Vector3(parentTranslation.x, parentTranslation.y, parentTranslation.z);
             entryTransform.scale = new Vector3(t.Scale.X, t.Scale.Y, t.Scale.Z);
+            //entryTransform.rotation = finalTransform.ExtractRotationQuaternion();
+            entryTransform.rotation = new Vector3(t.Rotation.X, t.Rotation.Y, t.Rotation.Z);
 
-            //Models within Sgbs inherit transform from their direct parent Sgb
-            if (parent != null)
-            {
-                entryTransform.translation += new Vector3(parent.translation.x, parent.translation.y, parent.translation.z);
-                entryTransform.rotation += new Vector3(parent.rotation.x, parent.rotation.y, parent.rotation.z);
-            }
+            //Fix for map reflection
+//            entryTransform.translation = new Vector3(entryTransform.translation.x * -1,
+//                                                        entryTransform.translation.y,
+//                                                        entryTransform.translation.z);
 
             m.transform = entryTransform;
             
@@ -39,6 +48,17 @@ namespace FFXIVHSLauncher
             mModel.numMeshes = m.GetModel(ModelQuality.High).Meshes.Length;
 
             return mModel;
+        }
+
+        public static Quaternion ExtractRotationQuaternion(this Matrix m)
+        {
+            SharpDX.Quaternion dxRot = SharpDX.Quaternion.RotationMatrix(m);
+            return new Quaternion(dxRot.X, dxRot.Y, dxRot.Z, dxRot.W);
+        }
+
+        public static Vector3 ToLibVector3(this SaintCoinach.Graphics.Vector3 v)
+        {
+            return new Vector3(v.X, v.Y, v.Z);
         }
     }
 }
