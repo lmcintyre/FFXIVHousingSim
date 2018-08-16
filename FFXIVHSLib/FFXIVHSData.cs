@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using SharpDX;
 using UnityEngine;
 
 namespace FFXIVHSLib
 {
     //Utility for serialization shared between WPF/SaintCoinach and Unity.
     //TODO: Extract classes to their own files
+
+    public enum Ward { S1H1, F1H1, W1H1, E1H1 }
 
     public enum Size
     {
@@ -102,18 +103,6 @@ namespace FFXIVHSLib
             v.z *= Mathf.Rad2Deg;
             return v;
         }
-
-        public Quaternion ToQuaternion()
-        {
-            Matrix m = Matrix.Identity *
-                       Matrix.RotationX(x) *
-                       Matrix.RotationY(y) *
-                       Matrix.RotationZ(z);
-
-            SharpDX.Quaternion dxQuat = SharpDX.Quaternion.RotationMatrix(m);
-
-            return new Quaternion(dxQuat.X, dxQuat.Y, dxQuat.Z, dxQuat.W);
-        }
     }
 
     public class Quaternion
@@ -139,11 +128,6 @@ namespace FFXIVHSLib
         public static implicit operator UnityEngine.Quaternion(Quaternion q)
         {
             return new UnityEngine.Quaternion(q.x, q.y, q.z, q.w);
-        }
-
-        public static implicit operator SharpDX.Quaternion(Quaternion q)
-        {
-            return new SharpDX.Quaternion(q.x, q.y, q.z, q.w);
         }
 
         /// <summary>
@@ -201,7 +185,7 @@ namespace FFXIVHSLib
     /// </summary>
     public class WardSetting
     {
-        public Plot.Ward Ward { get; set; }
+        public Ward Ward { get; set; }
         public string group { get; set; }
         public string subdivisionSuffix { get; set; }
         public string plotName { get; set; }
@@ -271,8 +255,8 @@ namespace FFXIVHSLib
         public string groupName;
         public Transform groupTransform;
 
-        public MapGroup[] groups;
-        public MapModelEntry[] entries;
+        public List<MapGroup> groups;
+        public List<MapModelEntry> entries;
 
         public MapGroup()
         {
@@ -285,6 +269,21 @@ namespace FFXIVHSLib
             groupName = name;
         }
 
+        public void AddGroup(MapGroup mg)
+        {
+            if (groups == null)
+                groups = new List<MapGroup>();
+
+            groups.Add(mg);
+        }
+
+        public void AddEntry(MapModelEntry mme)
+        {
+            if (entries == null)
+                entries = new List<MapModelEntry>();
+
+            entries.Add(mme);
+        }
     }
 
     /// <summary>
@@ -327,8 +326,6 @@ namespace FFXIVHSLib
     /// </summary>
     public class Plot
     {
-        public enum Ward { S1H1, F1H1, W1H1, E1H1 }
-
         public Ward ward { get; set; }
         public bool subdiv { get; set; }
         public byte index { get; set; }

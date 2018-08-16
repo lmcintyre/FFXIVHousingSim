@@ -20,7 +20,7 @@ public class CameraHandler : MonoBehaviour
     private GameObject _center;
     private Vector3 _defaultLook = new Vector3(90, 0, 0);
 
-    public Plot.Ward _ward;
+    public Ward _ward;
     private int _plotView = 1;
     private bool _subdiv;
     

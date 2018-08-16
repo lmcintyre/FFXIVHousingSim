@@ -39,8 +39,8 @@ public static class DataHandler
 	private static Dictionary<int, Mesh[][][]> _exteriorFixtureMeshes;
 	private static Dictionary<int, FFXIVHSLib.Transform[][]> _exteriorFixtureMeshTransforms;
 
-    private static Plot.Ward _territory = (Plot.Ward) 999;
-    public static Plot.Ward territory
+    private static Ward _territory = (Ward) 999;
+    public static Ward territory
     {
         get { return _territory; }
         set
@@ -283,7 +283,7 @@ public static class DataHandler
 
 		groupRootObject.SetActive(true);
 		
-		if (group.entries != null && group.entries.Length > 0)
+		if (group.entries != null && group.entries.Count > 0)
 		{
 			foreach (MapModelEntry entry in group.entries)
 			{
@@ -298,7 +298,7 @@ public static class DataHandler
 			}	
 		}
 
-		if (group.groups != null && group.groups.Length > 0)
+		if (group.groups != null && group.groups.Count > 0)
 		{
 			foreach (MapGroup subGroup in group.groups)
 			{
@@ -540,12 +540,12 @@ public static class DataHandler
 		return modelMeshes;
 	}
 	
-    public static Plot.Ward GetCurrentTerritoryWard()
+    public static Ward GetCurrentTerritoryWard()
     {
         return territory;
     }
     
-    public static Plot GetPlot(Plot.Ward ward, int plotNum, bool subdiv)
+    public static Plot GetPlot(Ward ward, int plotNum, bool subdiv)
     {
         if (_wardInfo == null)
             LoadWardInfo();

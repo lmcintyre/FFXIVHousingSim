@@ -50,7 +50,7 @@ namespace FFXIVHSLib
             return path;
         }
 
-        public static string GetWardDirectory(Plot.Ward ward)
+        public static string GetWardDirectory(Ward ward)
         {
             string path = Path.Combine(root, ward.ToString().ToLowerInvariant() + "\\");
 
@@ -59,7 +59,7 @@ namespace FFXIVHSLib
             return path;
         }
 
-        public static string GetWardObjectsDirectory(Plot.Ward ward)
+        public static string GetWardObjectsDirectory(Ward ward)
         {
             string path = Path.Combine(GetWardDirectory(ward), "objects\\");
 
@@ -68,14 +68,14 @@ namespace FFXIVHSLib
             return path;
         }
 
-        public static string GetWardJson(Plot.Ward ward)
+        public static string GetWardJson(Ward ward)
         {
             string path = Path.Combine(GetWardDirectory(ward), ward.ToString().ToLowerInvariant() + ".json");
 
             return path;
         }
 
-        public static string GetWardLandsetJson(Plot.Ward ward)
+        public static string GetWardLandsetJson(Ward ward)
         {
             string path = Path.Combine(GetWardDirectory(ward), "Landset.json");
 
