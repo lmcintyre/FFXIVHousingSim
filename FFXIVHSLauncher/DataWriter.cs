@@ -68,6 +68,30 @@ namespace FFXIVHSLauncher
                 hdr.Scale.ToLibVector3());
         }
 
+        public static List<TerritoryType> GetHousingTerritoryTypes(ARealmReversed realm)
+        {
+            //Obtain all housing TerritoryTypes
+            IXivSheet<TerritoryType> allTerr = realm.GameData.GetSheet<TerritoryType>();
+            TerritoryType[] tTypes = allTerr.ToArray();
+            List<TerritoryType> housingTeriTypes = new List<TerritoryType>();
+
+            foreach (TerritoryType t in tTypes)
+            {
+                if (!String.IsNullOrEmpty(t.PlaceName.ToString()))
+                {
+                    byte intendedUse = (byte)t.GetRaw("TerritoryIntendedUse");
+
+                    //Housing territory intended use is 13
+                    if (intendedUse == 13)
+                    {
+                        housingTeriTypes.Add(t);
+                    }
+                }
+            }
+
+            return housingTeriTypes;
+        }
+
         /// <summary>
         /// Occurs first in the ward data output flow and populates plots with the sizes of
         /// the appropriate plots from the sheet HousingLandSet.
@@ -101,24 +125,7 @@ namespace FFXIVHSLauncher
         /// </summary>
         private static void ReadTerritoryPlots(ARealmReversed realm, ref List<Plot> plots)
         {
-            //Obtain all housing TerritoryTypes
-            IXivSheet<TerritoryType> allTerr = realm.GameData.GetSheet<TerritoryType>();
-            TerritoryType[] tTypes = allTerr.ToArray();
-            List<TerritoryType> housingTeriTypes = new List<TerritoryType>();
-
-            foreach (TerritoryType t in tTypes)
-            {
-                if (!String.IsNullOrEmpty(t.PlaceName.ToString()))
-                {
-                    byte intendedUse = (byte)t.GetRaw("TerritoryIntendedUse");
-                    
-                    //Housing territory intended use is 13
-                    if (intendedUse == 13)
-                    {
-                        housingTeriTypes.Add(t);
-                    }
-                }
-            }
+            List<TerritoryType> housingTeriTypes = GetHousingTerritoryTypes(realm);
 
             WardSetting[] settings = JsonConvert.DeserializeObject<WardSetting[]>(File.ReadAllText(FFXIVHSPaths.GetWardSettingsJson()));
             
@@ -294,6 +301,64 @@ namespace FFXIVHSLauncher
                 fixtures.Add(rowFixture.fixtureId, rowFixture);
             }
             return fixtures;
+        }
+
+        /// <summary>
+        /// Adds the housing ward default fences as exterior fixtures with an id.
+        /// The game does not actually recognize these as fixtures, they are part of the map.
+        /// However, currently there is no way to know which transforms within the map sgbs belongs to
+        /// which house size. So we have to work around it. Thanks SE!
+        /// </summary>
+        /// <param name="realm"></param>
+        /// <param name="fixtures"></param>
+        private static void AddDefaultFences(ARealmReversed realm, ref Dictionary<int, HousingExteriorFixture> fixtures)
+        {
+            List<TerritoryType> teris = GetHousingTerritoryTypes(realm);
+
+            //Obtain all housing TerritoryTypes
+            IXivSheet<PlaceName> placeNames = realm.GameData.GetSheet<PlaceName>();
+            PlaceName[] pNames = placeNames.ToArray();
+
+            string[] fncPaths =
+            {
+                "bg/ffxiv/{0}/hou/dyna/c_fnc/0000/asset/{1}_f_fnc0000a.sgb",
+                "bg/ffxiv/{0}/hou/dyna/c_fnc/0000/asset/{1}_f_fnc0000b.sgb",
+                "bg/ffxiv/{0}/hou/dyna/c_fnc/0000/asset/{1}_f_fnc0000c.sgb",
+                "bg/ffxiv/{0}/hou/dyna/c_fnc/0000/asset/{1}_f_fnc0000d.sgb",
+            };
+
+            foreach (TerritoryType t in teris)
+            {
+                //Get usable strings
+                string bgFolder = t.Bg.ToString().Split('/')[1];
+                string namePrefix = t.Name.ToString();
+                namePrefix = namePrefix.Substring(0, namePrefix.Length - 1) + '0';
+
+                //bgFolder is now 'sea_s1', 'est_e1', etc
+                //namePrefix is now 's1h0', 'e1h0', etc
+                int intUse = pNames.Where(_ => _.Name == t.RegionPlaceName.Name)
+                                    .Select(_ => _.Key)
+                                    .Min(_ => _);
+                
+                HousingExteriorFixture thisFence = new HousingExteriorFixture();
+                thisFence.itemId = 0;
+                thisFence.fixtureId = int.Parse("102" + intUse);
+                thisFence.fixtureModelKey = 0;  //Not in the sheet, no key ¯\_(ツ)_/¯
+                thisFence.fixtureType = FixtureType.fnc;
+                thisFence.fixtureIntendedUse = intUse;
+                thisFence.size = Size.x;
+                thisFence.name = $"Default {t.PlaceName.NameWithoutArticle} Fence";
+
+                List<string> sgbPaths = new List<string>();
+
+                foreach (string fnc in fncPaths)
+                    sgbPaths.Add(string.Format(fnc, bgFolder, namePrefix));
+
+                //I forgot this method existed. Thanks!
+                thisFence.variants = ReadSgbForVariantInfo(realm, sgbPaths.ToArray());
+
+                fixtures.Add(thisFence.fixtureId, thisFence);
+            }
         }
 
         /// <summary>
@@ -502,6 +567,12 @@ namespace FFXIVHSLauncher
                         }
                     }
 
+                    //Whoops, don't do it for fences
+                    for (int j = 0; j < numTransformsInSmallerBlueprints[(int) FixtureType.fnc - 1].Length; j++)
+                    {
+                        numTransformsInSmallerBlueprints[(int) FixtureType.fnc - 1][j] = 0;
+                    }
+
                     //For every fixture type
                     for (int fixtureTypeIndex = 0; fixtureTypeIndex < numTransformsInSmallerBlueprints.Length; fixtureTypeIndex++)
                     {
@@ -629,14 +700,14 @@ namespace FFXIVHSLauncher
         {
             if (String.IsNullOrEmpty(gimmickName))
             {
-                return gimmickPath.Substring(gimmickPath.LastIndexOf('\\') + 1).Replace(".sgb", "");
+                return gimmickPath.Substring(gimmickPath.LastIndexOf('/') + 1).Replace(".sgb", "");
             }
             return gimmickName;
         }
 
         /// <summary>
         /// Parses an SgbFile for model entries or further gimmicks, and adds groups
-        /// to the given List&lt;MapModelEntry&gt;.
+        /// to the given MapGroup.
         /// </summary>
         /// <param name="file"></param>
         /// <param name="parent"></param>
@@ -700,6 +771,7 @@ namespace FFXIVHSLauncher
             }
 
             Dictionary<int, HousingExteriorFixture> fixtures = ReadHousingExteriorSheet(realm);
+            AddDefaultFences(realm, ref fixtures);
 
             string json = JsonConvert.SerializeObject(fixtures, Formatting.Indented);
 
@@ -783,50 +855,6 @@ namespace FFXIVHSLauncher
                 if (realm.Packs.TryGetFile(model.modelPath, out SaintCoinach.IO.File f))
                     ObjectFileWriter.WriteObjectFile(outpath, (ModelFile)f);
             }
-        }
-    }
-
-    public static class VectorConverter
-    {
-        public static SharpDX.Vector3 ToDx(this SaintCoinach.Graphics.Vector3 self)
-        {
-            return new SharpDX.Vector3
-            {
-                X = self.X,
-                Y = self.Y,
-                Z = self.Z
-            };
-        }
-        public static SharpDX.Vector3 ToDx(this SaintCoinach.Graphics.Vector3? self, SharpDX.Vector3 defaultValue)
-        {
-            if (self.HasValue)
-                return self.Value.ToDx();
-            return defaultValue;
-        }
-        public static SharpDX.Vector4 ToDx(this SaintCoinach.Graphics.Vector4 self)
-        {
-            return new SharpDX.Vector4
-            {
-                X = self.X,
-                Y = self.Y,
-                Z = self.Z,
-                W = self.W
-            };
-        }
-        public static SharpDX.Vector3 ToDx3(this SaintCoinach.Graphics.Vector4 self)
-        {
-            return new SharpDX.Vector3
-            {
-                X = self.X,
-                Y = self.Y,
-                Z = self.Z
-            };
-        }
-        public static SharpDX.Vector4 ToDx(this SaintCoinach.Graphics.Vector4? self, SharpDX.Vector4 defaultValue)
-        {
-            if (self.HasValue)
-                return self.Value.ToDx();
-            return defaultValue;
         }
     }
 }

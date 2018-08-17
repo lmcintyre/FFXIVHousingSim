@@ -42,6 +42,12 @@ namespace FFXIVHSLib
         a, b, c, d
     }
 
+    public class DefaultFences
+    {
+        public static readonly int[] fnc =
+            {10222, 10223, 10224, 1022402};
+    }
+
     public class Vector3
     {
         public float x, y, z;
@@ -88,20 +94,6 @@ namespace FFXIVHSLib
                 return false;
 
             return (v3.x == x && v3.y == y && v3.z == z);
-        }
-
-        /// <summary>
-        /// Returns this Vector3 with its x, y, and z components converted from
-        /// degrees to radians using Mathf.Rad2Deg.
-        /// </summary>
-        /// <returns></returns>
-        public Vector3 RadiansToDegreesRotation()
-        {
-            Vector3 v = new Vector3(x, y, z);
-            v.x *= Mathf.Rad2Deg;
-            v.y *= Mathf.Rad2Deg;
-            v.z *= Mathf.Rad2Deg;
-            return v;
         }
     }
 
@@ -329,15 +321,17 @@ namespace FFXIVHSLib
         public Ward ward { get; set; }
         public bool subdiv { get; set; }
         public byte index { get; set; }
+        public int defaultFenceId { get; set; }
         public Size size { get; set; }
         public Vector3 position { get; set; }
         public Quaternion rotation { get; set; }
-
+        
         public Plot() { }
 
         public Plot(Ward ward, bool sub, byte ind, Size size)
         {
             this.ward = ward;
+            defaultFenceId = DefaultFences.fnc[(int) ward];
             this.index = ind;
             this.subdiv = sub;
             this.size = size;
