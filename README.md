@@ -1,3 +1,5 @@
+Note: This project is currently on hold during the college semester.
+
 # FFXIVHousingSim
 The current release should be considered pre-alpha and contains exploratory code not really meant for actual use.
 The goal of this project is to develop a housing simulator for Final Fantasy 14. Its current design uses a WPF-based asset exporter and a Unity-based map viewer.
