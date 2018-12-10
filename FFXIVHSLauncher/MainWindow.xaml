@@ -24,7 +24,7 @@
         <Label Content="Deprecated:" HorizontalAlignment="Left" Margin="691,9,0,0" VerticalAlignment="Top"/>
         <Label Content="Extract:" HorizontalAlignment="Left" Margin="691,127,0,0" VerticalAlignment="Top"/>
         <Label Content="Experimental:" HorizontalAlignment="Left" Margin="696,264,0,0" VerticalAlignment="Top"/>
-        <Button Content="WardInfo JSON" HorizontalAlignment="Left" Margin="696,172,0,0" VerticalAlignment="Top" Width="113" Click="JsonWriteButton_Click"/>
+        <Button Content="TerritoryInfo JSON" HorizontalAlignment="Left" Margin="696,172,0,0" VerticalAlignment="Top" Width="113" Click="JsonWriteButton_Click"/>
         <Button Content="Resolve SGBs in Box" x:Name="ResolveBoxSgbs" HorizontalAlignment="Left" Margin="696,290,0,0" VerticalAlignment="Top" Width="113" Height="22" IsCancel="True" Click="ResolveBoxSgbs_Click">
         </Button>
         <Button x:Name="ExteriorHousingJsonBtn" Content="Ext Housing JSON" HorizontalAlignment="Left" Margin="696,196,0,0" VerticalAlignment="Top" Width="113" Height="19" Click="ExteriorHousingJsonBtn_Click"/>

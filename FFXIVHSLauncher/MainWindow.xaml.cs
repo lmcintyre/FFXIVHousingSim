@@ -17,6 +17,7 @@ using SaintCoinach.Graphics.Sgb;
 using SaintCoinach.Imaging;
 using Directory = System.IO.Directory;
 using File = System.IO.File;
+using Territory = SaintCoinach.Graphics.Territory;
 using Vector3 = SaintCoinach.Graphics.Vector3;
 
 namespace FFXIVHSLauncher
@@ -64,6 +65,13 @@ namespace FFXIVHSLauncher
                     {
                         relevantTerritories.Add(t);
                     }
+                    else if (intendedUse == 14)
+                    {
+                        if (t.PlaceName.ToString().Contains("Private") || t.PlaceName.ToString().Contains("Apartment"))
+                            relevantTerritories.Add(t);
+                    }
+
+                    
                 }
             }
             amountLabel.Content = (String)amountLabel.Content + relevantTerritories.Count;

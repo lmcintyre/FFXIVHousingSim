@@ -20,7 +20,7 @@ public class CameraHandler : MonoBehaviour
     private GameObject _center;
     private Vector3 _defaultLook = new Vector3(90, 0, 0);
 
-    public Ward _ward;
+    public Territory _territory;
     private int _plotView = 1;
     private bool _subdiv;
     
@@ -86,7 +86,7 @@ public class CameraHandler : MonoBehaviour
     
     private void UpdatePlotView()
     {
-        _centeredPlot = DataHandler.GetPlot(_ward, _plotView, _subdiv);
+        _centeredPlot = DataHandler.GetPlot(_territory, _plotView, _subdiv);
         Debug.LogFormat("Plot {0} selected at {1} {2} {3}", _centeredPlot.index,
             _centeredPlot.position.x, _centeredPlot.position.y, _centeredPlot.position.z);
 

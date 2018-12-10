@@ -8,7 +8,17 @@ namespace FFXIVHSLib
     //Utility for serialization shared between WPF/SaintCoinach and Unity.
     //TODO: Extract classes to their own files
 
-    public enum Ward { S1H1, F1H1, W1H1, E1H1 }
+    public enum Territory
+    {
+        //Wards
+        S1H1, F1H1, W1H1, E1H1,
+
+        //Houses
+        S1I1, S1I2, S1I3, S1I4,
+        F1I1, F1I2, F1I3, F1I4,
+        W1I1, W1I2, W1I3, W1I4,
+        E1I1, E1I2, E1I3, E1I4
+    }
 
     public enum Size
     {
@@ -177,7 +187,7 @@ namespace FFXIVHSLib
     /// </summary>
     public class WardSetting
     {
-        public Ward Ward { get; set; }
+        public Territory Territory { get; set; }
         public string group { get; set; }
         public string subdivisionSuffix { get; set; }
         public string plotName { get; set; }
@@ -318,7 +328,7 @@ namespace FFXIVHSLib
     /// </summary>
     public class Plot
     {
-        public Ward ward { get; set; }
+        public Territory ward { get; set; }
         public bool subdiv { get; set; }
         public byte index { get; set; }
         public int defaultFenceId { get; set; }
@@ -328,7 +338,7 @@ namespace FFXIVHSLib
         
         public Plot() { }
 
-        public Plot(Ward ward, bool sub, byte ind, Size size)
+        public Plot(Territory ward, bool sub, byte ind, Size size)
         {
             this.ward = ward;
             defaultFenceId = DefaultFences.fnc[(int) ward];
@@ -337,9 +347,9 @@ namespace FFXIVHSLib
             this.size = size;
         }
 
-        public static Ward StringToWard(String ward)
+        public static Territory StringToWard(String ward)
         {
-            return (Ward) Enum.Parse(typeof(Ward), ward.ToUpperInvariant());
+            return (Territory) Enum.Parse(typeof(Territory), ward.ToUpperInvariant());
         }
     }
 

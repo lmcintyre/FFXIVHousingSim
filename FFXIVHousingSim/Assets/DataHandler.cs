@@ -39,8 +39,8 @@ public static class DataHandler
 	private static Dictionary<int, Mesh[][][]> _exteriorFixtureMeshes;
 	private static Dictionary<int, FFXIVHSLib.Transform[][]> _exteriorFixtureMeshTransforms;
 
-    private static Ward _territory = (Ward) 999;
-    public static Ward territory
+    private static Territory _territory = (Territory) 999;
+    public static Territory territory
     {
         get { return _territory; }
         set
@@ -53,7 +53,7 @@ public static class DataHandler
 	        
 	        //TODO: When events implemented make this an event
 	        CameraHandler[] c = Resources.FindObjectsOfTypeAll<CameraHandler>();
-	        c[0]._ward = value;
+	        c[0]._territory = value;
 			
 			GameObject[] currentGameObjects = Resources.FindObjectsOfTypeAll<GameObject>();
 	
@@ -207,7 +207,7 @@ public static class DataHandler
 
     private static void LoadMapTerrainInfo()
     {
-        string jsonText = File.ReadAllText(FFXIVHSPaths.GetWardJson(territory));
+        string jsonText = File.ReadAllText(FFXIVHSPaths.GetTerritoryJson(territory));
 
         _map = JsonConvert.DeserializeObject<Map>(jsonText);
 	    Debug.Log("_map loaded.");
@@ -219,7 +219,7 @@ public static class DataHandler
 
         _modelMeshes = new Dictionary<int, Mesh[]>();
 
-	    string objectsFolder = FFXIVHSPaths.GetWardObjectsDirectory(territory);
+	    string objectsFolder = FFXIVHSPaths.GetTerritoryObjectsDirectory(territory);
         
         foreach (MapModel model in _map.models.Values)
         {
@@ -490,13 +490,13 @@ public static class DataHandler
 		return modelMeshes;
 	}
     
-    public static Plot GetPlot(Ward ward, int plotNum, bool subdiv)
+    public static Plot GetPlot(Territory territory, int plotNum, bool subdiv)
     {
         if (_wardInfo == null)
             LoadWardInfo();
 
-	    Debug.LogFormat("GetPlot {0} {1} {2}", ward, plotNum, subdiv);
-        Plot p = _wardInfo.Where(_ => _.ward == ward &&
+	    Debug.LogFormat("GetPlot {0} {1} {2}", territory, plotNum, subdiv);
+        Plot p = _wardInfo.Where(_ => _.ward == territory &&
                                       _.index == plotNum &&
                                       _.subdiv == subdiv)
                                         .Select(_ => _).Single();

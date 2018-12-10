@@ -50,34 +50,34 @@ namespace FFXIVHSLib
             return path;
         }
 
-        public static string GetWardDirectory(Ward ward)
+        public static string GetTerritoryDirectory(Territory territory)
         {
-            string path = Path.Combine(root, ward.ToString().ToLowerInvariant() + "\\");
+            string path = Path.Combine(root, territory.ToString().ToLowerInvariant() + "\\");
 
             CreateDirectoryIfNotExists(path);
 
             return path;
         }
 
-        public static string GetWardObjectsDirectory(Ward ward)
+        public static string GetTerritoryObjectsDirectory(Territory territory)
         {
-            string path = Path.Combine(GetWardDirectory(ward), "objects\\");
+            string path = Path.Combine(GetTerritoryDirectory(territory), "objects\\");
 
             CreateDirectoryIfNotExists(path);
 
             return path;
         }
 
-        public static string GetWardJson(Ward ward)
+        public static string GetTerritoryJson(Territory territory)
         {
-            string path = Path.Combine(GetWardDirectory(ward), ward.ToString().ToLowerInvariant() + ".json");
+            string path = Path.Combine(GetTerritoryDirectory(territory), territory.ToString().ToLowerInvariant() + ".json");
 
             return path;
         }
 
-        public static string GetWardLandsetJson(Ward ward)
+        public static string GetWardLandsetJson(Territory territory)
         {
-            string path = Path.Combine(GetWardDirectory(ward), "Landset.json");
+            string path = Path.Combine(GetTerritoryDirectory(territory), "Landset.json");
 
             return path;
         }

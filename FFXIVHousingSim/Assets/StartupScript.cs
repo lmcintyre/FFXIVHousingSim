@@ -18,7 +18,7 @@ public class StartupScript : MonoBehaviour
 		DebugTimer timer = new DebugTimer();
 		timer.registerEvent("Begin");
 		
-		DataHandler.territory = Ward.S1H1;
+		DataHandler.territory = Territory.S1H1;
 		
 		timer.registerEvent("TerritoryLoad");
 

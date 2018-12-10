@@ -15,6 +15,7 @@ using File = System.IO.File;
 using Directory = System.IO.Directory;
 using Map = FFXIVHSLib.Map;
 using Quaternion = FFXIVHSLib.Quaternion;
+using Territory = FFXIVHSLib.Territory;
 using Vector3 = FFXIVHSLib.Vector3;
 
 
@@ -102,13 +103,13 @@ namespace FFXIVHSLauncher
 
             foreach (XivRow row in landSet)
             {
-                Ward thisWard = (Ward) row.Key;
+                Territory thisTerritory = (Territory) row.Key;
 
                 for (int i = 0; i < 60; i++)
                 {
                     //Get this plot's size
                     Size size = (Size) (byte) row[i];
-                    Plot p = new Plot(thisWard, i > 29, (byte) (i % 30 + 1), size);
+                    Plot p = new Plot(thisTerritory, i > 29, (byte) (i % 30 + 1), size);
                     plots.Add(p);
                 }
             }
@@ -131,7 +132,7 @@ namespace FFXIVHSLauncher
             
             foreach (TerritoryType tType in housingTeriTypes)
             {
-                Territory t = new Territory(tType);
+                SaintCoinach.Graphics.Territory t = new SaintCoinach.Graphics.Territory(tType);
                 LgbFile bg = null;
 
                 //Get the ward's information from the wardsettings.json
@@ -139,7 +140,7 @@ namespace FFXIVHSLauncher
 
                 foreach (WardSetting ws in settings)
                 {
-                    if (ws.Ward.ToString() == t.Name.ToUpper())
+                    if (ws.Territory.ToString() == t.Name.ToUpper())
                     {
                         plotName = ws.plotName;
                         groupName = ws.group;
@@ -304,7 +305,7 @@ namespace FFXIVHSLauncher
         }
 
         /// <summary>
-        /// Adds the housing ward default fences as exterior fixtures with an id.
+        /// Adds the housing territory default fences as exterior fixtures with an id.
         /// The game does not actually recognize these as fixtures, they are part of the map.
         /// However, currently there is no way to know which transforms within the map sgbs belongs to
         /// which house size. So we have to work around it. Thanks SE!
@@ -617,7 +618,7 @@ namespace FFXIVHSLauncher
         private static Map ReadTerritory(TerritoryType teriType)
         {
             Map map = new Map();
-            Territory teri = new Territory(teriType);
+            SaintCoinach.Graphics.Territory teri = new SaintCoinach.Graphics.Territory(teriType);
                         
             if (teri.Terrain != null)
             {
@@ -819,9 +820,9 @@ namespace FFXIVHSLauncher
 
         public static void WriteMap(ARealmReversed realm, TerritoryType teriType)
         {
-            Ward ward = Plot.StringToWard(teriType.Name);
+            Territory territory = Plot.StringToWard(teriType.Name);
 
-            string outpath = FFXIVHSPaths.GetWardJson(ward);
+            string outpath = FFXIVHSPaths.GetTerritoryJson(territory);
 
             if (File.Exists(outpath))
             {
@@ -838,13 +839,13 @@ namespace FFXIVHSLauncher
 
         public static void WriteMapModels(ARealmReversed realm, TerritoryType teriType)
         {
-            Ward ward = Plot.StringToWard(teriType.Name);
+            Territory territory = Plot.StringToWard(teriType.Name);
 
-            string inpath = FFXIVHSPaths.GetWardJson(ward);
+            string inpath = FFXIVHSPaths.GetTerritoryJson(territory);
             if (!File.Exists(inpath))
                 throw new FileNotFoundException();
 
-            string outpath = FFXIVHSPaths.GetWardObjectsDirectory(ward);
+            string outpath = FFXIVHSPaths.GetTerritoryObjectsDirectory(territory);
 
             string json = File.ReadAllText(inpath);
                 
