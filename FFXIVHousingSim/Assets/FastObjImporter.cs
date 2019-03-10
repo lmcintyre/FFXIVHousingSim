@@ -57,6 +57,7 @@ public sealed class FastObjImporter
  
         /* The following foreach loops through the facedata and assigns the appropriate vertex, uv, or normal
          * for the appropriate Unity mesh array.     */
+        Debug.Log(filePath);
         for (int i = 0; i < faceData.Count; i++)
         {
             newVerts[i] = vertices[faceData[i].x - 1];

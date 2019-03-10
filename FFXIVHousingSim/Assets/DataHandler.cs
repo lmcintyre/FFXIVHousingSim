@@ -18,13 +18,16 @@ public static class DataHandler
 {
 	private static bool DebugLoadMap = true;
 	private static bool DebugCustomLoad = false;
-
-	private static bool DebugLoadExteriors = true;
+	private static bool DebugLoadExteriors = false;
 	
-	//Implement
-	private static int[] debugCustomLoadList = new[]
+//	private static int[] debugCustomLoadList =
+//	{
+//		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30
+//	};
+	
+	private static int[] debugCustomLoadList =
 	{
-		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30
+		126
 	};
 	
     //Serialized FFXIV data
@@ -223,6 +226,10 @@ public static class DataHandler
         
         foreach (MapModel model in _map.models.Values)
         {
+	        if (DebugCustomLoad)
+		        if (!debugCustomLoadList.Contains(model.id))
+			        continue;
+	        
             Mesh[] modelMeshes = new Mesh[model.numMeshes];
 
             for (int i = 0; i < model.numMeshes; i++)
@@ -242,9 +249,7 @@ public static class DataHandler
 		    LoadMapMeshes();
 		
 		    foreach (MapGroup group in _map.groups.Values)
-		    {
 			    LoadMapGroup(group);
-			}
 	    }
 	    
 	    LoadLandset();
@@ -277,6 +282,10 @@ public static class DataHandler
 		{
 			foreach (MapModelEntry entry in group.entries)
 			{
+				if (DebugCustomLoad)
+					if (!debugCustomLoadList.Contains(entry.modelId))
+						continue;
+				
 				Mesh[] meshes = _modelMeshes[entry.modelId];
 				GameObject obj = AddMeshToNewGameObject(meshes, true);
 
