@@ -4,6 +4,8 @@ Note: This project is currently on hold during the college semester.
 The current release should be considered pre-alpha and contains exploratory code not really meant for actual use.
 The goal of this project is to develop a housing simulator for Final Fantasy 14. Its current design uses a WPF-based asset exporter and a Unity-based map viewer.
 
+![mist house](mist_house.jpg "Mist House")
+
 In-game there are a variety of customization options for the exterior and interior of the home, as well as yard objects and indoor furniture. In the current retail version of FFXIV, there is no ability to preview these items unless someone obtains them and takes screenshots, or places them in their public home.
 
 ## Main goals
