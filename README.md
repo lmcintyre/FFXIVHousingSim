@@ -1,4 +1,4 @@
-Note: This project is currently on hold during the college semester.
+Note: This project is now deprecated in favor of the in-game housing preview functionality. I'll be using the knowledge (and some code) from this project to create a Unity-based generic map viewer for the game soon.
 
 # FFXIVHousingSim
 The current release should be considered pre-alpha and contains exploratory code not really meant for actual use.
